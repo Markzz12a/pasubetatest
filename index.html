@@ -3,153 +3,331 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pasugame - Dino Game</title>
+<title>PasuGame - Dino Run Full</title>
 <style>
-  /* ... style เหมือนเดิมครับ ไม่เปลี่ยนแปลง */
-  html, body {
-    margin:0; padding:0; overflow:hidden;
-    font-family: Arial, sans-serif;
-    background:#000;
+  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+  /* Reset */
+  * {
+    box-sizing: border-box;
   }
+
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Comic Neue', cursive, Arial, sans-serif;
+    background: #335544; /* forest green placeholder */
+    overflow: hidden;
+  }
+
   #game {
     position: relative;
     width: 100vw;
     height: 100vh;
     background: url("Background.webp") no-repeat center center/cover;
+    overflow: hidden;
   }
+
   #ground {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 10vh;
-    background: url("ground.jpg") repeat-x center;
-    z-index: 1;
+    height: 12vh;
+    background: url("ground.jpg") repeat-x bottom/auto 12vh;
+    z-index: 10;
   }
+
+  #chibiCat {
+    position: absolute;
+    bottom: 12vh;
+    left: 3vw;
+    width: 10vw;
+    aspect-ratio: 1 / 1;
+    background: url("catWhite.png") no-repeat center/contain;
+    animation: catBreathe 3s ease-in-out infinite;
+    z-index: 20;
+  }
+  @keyframes catBreathe {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-0.5vh); }
+  }
+
+  /* Coin bar top left */
+  #coinBar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(45deg, #8B3E2F, #D97348);
+    border: 4px solid #7A3B24;
+    border-radius: 12px;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+    user-select: none;
+    z-index: 100;
+  }
+  #coinBar img {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Lobby overlay */
+  #lobby {
+    position: absolute;
+    inset: 0;
+    background:
+      url("Background.webp") no-repeat center center/cover;
+    filter: brightness(0.3);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+  }
+  #lobbyContent {
+    position: relative;
+    z-index: 200;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    color: white;
+  }
+
+  /* Play button center */
+  #playBtn {
+    margin-top: 15vh;
+    background: linear-gradient(145deg, #D97448, #B14B1C);
+    border: 3px solid #7A3B24;
+    border-radius: 24px;
+    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3), 0 5px 8px #572B0D;
+    font-size: 48px;
+    color: white;
+    font-weight: 700;
+    padding: 18px 100px;
+    cursor: pointer;
+    user-select: none;
+    text-shadow: 1px 1px 2px #511E0A;
+    transition: transform 0.15s ease;
+    font-family: 'Comic Neue', cursive, Arial, sans-serif;
+  }
+  #playBtn:hover {
+    transform: scale(1.05);
+  }
+  #playBtn:active {
+    transform: scale(0.95);
+  }
+
+  /* Top right hex menu */
+  #topMenu {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 16px;
+    z-index: 200;
+  }
+  .hexBtn {
+    --hex-size: 72px;
+    width: var(--hex-size);
+    height: calc(var(--hex-size) * 1.15);
+    background: #C16E33;
+    border: 3px solid #7A3B24;
+    clip-path: polygon(
+      25% 5%, 75% 5%,
+      100% 50%, 75% 95%,
+      25% 95%, 0% 50%
+    );
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .hexBtn:hover {
+    background: #D97448;
+  }
+  .hexBtn img {
+    width: 28px;
+    filter: drop-shadow(0 1px 0 #4F2F0C);
+  }
+  .hexBtn span {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 0 4px #511E0A;
+    user-select: none;
+  }
+
+  /* Modal background */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+  }
+
+  /* Modal panel */
+  .modal-panel {
+    background: #fef8ef;
+    border-radius: 14px;
+    box-shadow: 0 0 15px #4f360b;
+    padding: 24px 28px;
+    max-width: 460px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    color: #4b3c1a;
+  }
+
+  /* Close button red X top right */
+  .closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-weight: 900;
+    font-size: 28px;
+    color: #B33A3A;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1;
+  }
+  .closeBtn:hover {
+    color: #FF5555;
+  }
+
+  /* Character list cookie-run style */
+  #ownedCharacters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .charItem {
+    width: 110px;
+    background: linear-gradient(145deg, #fef7e3, #f9f3dc);
+    border: 2px solid #B47E29;
+    border-radius: 16px;
+    box-shadow: inset 0 3px 6px #f9f6d7;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+  }
+  .charItem img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .charItem button {
+    margin-top: 8px;
+    width: 80%;
+    background: #C16E33;
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 0;
+    cursor: pointer;
+    text-shadow: 0 0 2px #512F07;
+    transition: background 0.2s ease;
+  }
+  .charItem button:hover {
+    background: #D97448;
+  }
+
+  /* Confirm buy modal */
+  #confirmBuyModal .modal-panel {
+    max-width: 380px;
+    text-align: center;
+  }
+  #confirmBuyModal .modal-panel h3 {
+    margin-bottom: 18px;
+  }
+  #confirmBuyModal .btnConfirm {
+    margin: 8px 14px;
+    padding: 10px 36px;
+    font-weight: 700;
+    font-size: 18px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    text-shadow: 0 0 3px #4f360b;
+    transition: background 0.2s ease;
+  }
+  #confirmYesBtn {
+    background: #3A8E3A;
+  }
+  #confirmYesBtn:hover {
+    background: #5CC75C;
+  }
+  #confirmNoBtn {
+    background: #B33A3A;
+  }
+  #confirmNoBtn:hover {
+    background: #FF5555;
+  }
+
+  /* Guide modal with images */
+  #guideModal .modal-panel {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  #guideModal .modal-panel h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #7A3B24;
+  }
+  #guideModal .modal-panel img {
+    width: 100%;
+    border-radius: 14px;
+    margin: 14px 0;
+    box-shadow: 0 0 8px #B47E29;
+  }
+
+  /* Game UI */
+  #score {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    font-weight: 700;
+    font-size: 20px;
+    color: white;
+    text-shadow: 0 0 5px #4C2600;
+    user-select: none;
+    z-index: 200;
+  }
+
   #dino {
     position: absolute;
-    bottom: 10vh;
-    left: 8vw;
+    bottom: 12vh;
+    left: 12vw;
     width: 14vw;
     aspect-ratio: 391 / 322;
-    background: url("myDino.png") no-repeat center bottom / contain;
-    z-index: 10;
+    background: url("myDino.png") no-repeat center bottom/contain;
     transition: bottom 0.2s ease, height 0.3s ease;
+    z-index: 25;
   }
   #dino.slide {
     height: calc(14vw * 0.5) !important;
   }
-  #score, #coins {
-    position: fixed;
-    top: 10px;
-    font-size: 20px;
-    font-weight: bold;
-    color: #fff;
-    z-index: 20;
-    user-select:none;
-  }
-  #score { right: 20px; }
-  #coins { right: 150px; }
-  #lobby {
-    position: absolute;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    z-index: 100;
-  }
-  #logo {
-    margin-bottom: 40px;
-    width: 300px;
-    height: auto;
-  }
-  #playBtn {
-    width: 180px; height: 80px;
-    background: url("play.png") center/contain no-repeat;
-    border: none; cursor: pointer;
-    margin-bottom: 20px;
-  }
-  #lobbyButtons {
-    position: absolute; top: 10px; right: 10px;
-    display: flex; gap: 10px;
-  }
-  .topBtn {
-    width: 80px; height: 80px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-  .modal-bg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    flex-direction: column;
-  }
-  .modal-panel {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #000;
-    max-width: 400px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  .charItem {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .charItem img {
-    width: 80px; height: auto;
-    border-radius: 5px;
-  }
-  .charItem button {
-    padding: 7px 14px;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    background-color: #2196F3;
-    color: white;
-    border-radius: 5px;
-  }
-  .closeBtn {
-    position: absolute;
-    top: 5px; right: 10px;
-    font-size: 18px; color: red;
-    cursor: pointer;
-    user-select: none;
-  }
-  #gameOver {
-    position: absolute;
-    width: 100%; height: 100%;
-    top: 0; left: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 28px;
-    z-index: 300;
-  }
-  #gameOver button {
-    margin: 10px;
-    padding: 12px 40px;
-    font-size: 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
+
+  /* Jump and Slide buttons */
   #jumpBtn, #slideBtn {
     position: fixed;
     bottom: 20px;
@@ -160,344 +338,182 @@
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    display: none;
-    z-index: 400;
+    z-index: 220;
+    user-select: none;
   }
-  #jumpBtn { right: 110px; background-image: url("jump.png"); }
-  #slideBtn { right: 20px; background-image: url("slide.png"); }
+  #jumpBtn {
+    right: 110px;
+    background-image: url("jump.png");
+  }
+  #slideBtn {
+    right: 20px;
+    background-image: url("slide.png");
+  }
+
+  /* Obstacles */
   .obstacle {
     position: absolute;
-    bottom: 10vh;
+    bottom: 12vh;
     width: 4vw;
     height: 8vw;
     background: sienna;
     border-radius: 0.5vw;
-    z-index: 5;
+    z-index: 15;
   }
+  /* Box coin */
   .box {
     position: absolute;
-    top: 30vh;
+    bottom: 20vh;
     width: 4vw;
     height: 4vw;
     background: gold;
     border-radius: 50%;
-    z-index: 5;
+    box-shadow: 0 0 8px 2px #FFC800;
+    z-index: 15;
   }
+
+  /* Game over modal */
+  #gameOver {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    z-index: 400;
+  }
+  #gameOver button {
+    margin: 12px;
+    padding: 14px 48px;
+    font-size: 20px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Comic Neue', cursive, Arial, sans-serif;
+    font-weight: 700;
+  }
+  #gameOver .restartBtn {
+    background: #3A8E3A;
+    color: white;
+    box-shadow: 0 0 8px #2F6F2F;
+  }
+  #gameOver .lobbyBtn {
+    background: #B33A3A;
+    color: white;
+    box-shadow: 0 0 8px #7A2424;
+  }
+
+  /* Fix pointer events for buttons */
+  #playBtn, .hexBtn, .closeBtn, #confirmYesBtn, #confirmNoBtn, .charItem button, #jumpBtn, #slideBtn {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 500 !important;
+  }
+  #lobby {
+    pointer-events: none;
+  }
+  #lobby > * {
+    pointer-events: auto;
+  }
+
 </style>
 </head>
 <body>
-  <div id="game">
-    <div id="ground"></div>
-    <div id="dino"></div>
-    <div id="score">Score: 0</div>
-    <div id="coins">Coins: 0</div>
 
-    <!-- Lobby -->
-    <div id="lobby">
-      <img id="logo" src="logo.png" alt="Game Logo" />
-      <button id="playBtn"></button>
-      <div id="lobbyButtons">
-        <button class="topBtn" id="btnShop" style="background-image:url('shop.png')" title="Shop"></button>
-        <button class="topBtn" id="btnCharacter" style="background-image:url('model.png')" title="Characters"></button>
-        <button class="topBtn" id="btnBoard" style="background-image:url('board.png')" title="Leaderboard"></button>
-      </div>
-    </div>
+<div id="game">
+  <div id="ground"></div>
+  <div id="chibiCat" title="Your cute cat character"></div>
 
-    <!-- Modals -->
-    <div id="shopModal" class="modal-bg">
-      <div class="modal-panel">
-        <span class="closeBtn" onclick="closeModal('shopModal')">✖</span>
-        <h3>Shop</h3>
-        <div class="charItem">
-          <img src="peet.png" alt="Peet" />
-          <button onclick="buyCharacter('Peet')">Buy</button>
-        </div>
-        <div class="charItem">
-          <img src="broin.png" alt="Broin" />
-          <button onclick="buyCharacter('Broin')">Buy</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="characterPanel" class="modal-bg">
-      <div class="modal-panel">
-        <span class="closeBtn" onclick="closeModal('characterPanel')">✖</span>
-        <h3>My Characters</h3>
-        <div id="ownedCharacters"></div>
-      </div>
-    </div>
-
-    <div id="leaderboard" class="modal-bg">
-      <div class="modal-panel">
-        <span class="closeBtn" onclick="closeModal('leaderboard')">✖</span>
-        <h2>Leaderboard</h2>
-        <p>Coming soon...</p>
-      </div>
-    </div>
-
-    <div id="gameOver">
-      <div>Game Over!</div>
-      <button class="restartBtn" onclick="startGame()">Restart</button>
-      <button class="lobbyBtn" onclick="showLobby()">Lobby</button>
-    </div>
-
-    <button id="jumpBtn" title="Jump"></button>
-    <button id="slideBtn" title="Slide"></button>
+  <div id="coinBar" title="Fish Coins">
+    <img src="coin.png" alt="Coin Icon" />
+    <span id="coinCount">0</span>
   </div>
 
-  <script>
-    const dino = document.getElementById("dino");
-    const scoreDisplay = document.getElementById("score");
-    const coinsDisplay = document.getElementById("coins");
-    const lobby = document.getElementById("lobby");
-    const playBtn = document.getElementById("playBtn");
-    const btnShop = document.getElementById("btnShop");
-    const btnBoard = document.getElementById("btnBoard");
-    const btnCharacter = document.getElementById("btnCharacter");
-    const shopModal = document.getElementById("shopModal");
-    const characterPanel = document.getElementById("characterPanel");
-    const leaderboard = document.getElementById("leaderboard");
-    const gameOverModal = document.getElementById("gameOver");
-    const ownedCharactersContainer = document.getElementById("ownedCharacters");
-    const jumpBtn = document.getElementById("jumpBtn");
-    const slideBtn = document.getElementById("slideBtn");
+  <div id="score" title="Score">Score: 0</div>
 
-    let owned = ["myDino.png"];
-    let selectedCharacter = "myDino.png";
-    let score = 0;
-    let coins = 0;
-    let obstacles = [];
-    let boxes = [];
-    let gameInterval;
-    let gameSpeed = 0.6;
-    let jumping = false;
-    let sliding = false;
+  <div id="dino"></div>
 
-    // ฟิสิกส์กระโดด
-    let velocityY = 0;
-    const groundBottom = 10; // 10vh
-    const jumpVelocity = 16; // กระโดดสูงขึ้นนิดหน่อย
-    const gravity = -1.2; // แรงดึงลงเวลาตก ลดจากเดิมให้ตกช้าลง
+  <!-- Lobby -->
+  <div id="lobby">
+    <div id="lobbyContent">
+      <button id="playBtn" title="Start Game">Play</button>
 
-    const popSound = new Audio("pop.mp3");
-    const jumpSound = new Audio("jump.mp3");
-    const slideSound = new Audio("slide.mp3");
+      <div id="topMenu">
+        <button class="hexBtn" id="btnCharacter" title="Characters">
+          <img src="modelIcon.png" alt="Character Icon" />
+          <span>Character</span>
+        </button>
+        <button class="hexBtn" id="btnRank" title="Leaderboard">
+          <img src="rankIcon.png" alt="Rank Icon" />
+          <span>Rank</span>
+        </button>
+        <button class="hexBtn" id="btnGuide" title="Guide">
+          <img src="guideIcon.png" alt="Guide Icon" />
+          <span>Guide</span>
+        </button>
+        <button class="hexBtn" id="btnOption" title="Options">
+          <img src="optionIcon.png" alt="Option Icon" />
+          <span>Option</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-    function openModal(id) { document.getElementById(id).style.display = "flex"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+  <!-- Modals -->
 
-    function buyCharacter(name) {
-      if (!owned.includes(name)) {
-        owned.push(name);
-        alert("You bought " + name);
-        updateOwned();
-      } else {
-        alert("You already own " + name);
-      }
-    }
+  <!-- Character Modal -->
+  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="characterTitle" tabindex="0">
+      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
+      <h2 id="characterTitle">Characters</h2>
+      <div id="ownedCharacters"></div>
+    </div>
+  </div>
 
-    function updateOwned() {
-      let html = "";
-      owned.forEach(name => {
-        let imgSrc = name === "Peet" ? "peet.png" : name === "Broin" ? "broin.png" : "myDino.png";
-        html += `
-          <div class="charItem">
-            <img src="${imgSrc}" alt="${name}" />
-            <button onclick="selectCharacter('${name}')">Use</button>
-          </div>`;
-      });
-      if (html === "") html = "<p>No characters yet.</p>";
-      ownedCharactersContainer.innerHTML = html;
-    }
+  <!-- Confirm Buy Modal -->
+  <div id="confirmBuyModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="confirmBuyTitle" tabindex="0">
+      <span class="closeBtn" id="closeConfirmBuy" role="button" aria-label="Close Buy Confirmation">×</span>
+      <h3 id="confirmBuyTitle">Confirm Purchase</h3>
+      <p id="confirmBuyText"></p>
+      <button class="btnConfirm" id="confirmYesBtn">Yes</button>
+      <button class="btnConfirm" id="confirmNoBtn">No</button>
+    </div>
+  </div>
 
-    function selectCharacter(name) {
-      let img = name === "Peet" ? "peet.png" : name === "Broin" ? "broin.png" : "myDino.png";
-      selectedCharacter = img;
-      dino.style.backgroundImage = `url(${img})`;
-      alert("You selected: " + name);
-      closeModal("characterPanel");
-    }
+  <!-- Guide Modal -->
+  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="guideTitle" tabindex="0">
+      <span class="closeBtn" id="closeGuide" role="button" aria-label="Close Guide Modal">×</span>
+      <h2 id="guideTitle">Game Guide</h2>
+      <p>Welcome to the Pasugame! This is an endless runner game where you control a dino to avoid obstacles and collect boxes that give you coins.</p>
+      <img src="guide1.png" alt="Gameplay Example 1" />
+      <p>Use the jump and slide buttons (or keyboard keys W/S or arrows) to avoid obstacles. Collect as many boxes as possible to earn coins.</p>
+      <img src="guide2.png" alt="Gameplay Example 2" />
+      <p>Spend your coins in the Character menu to buy new characters. Your progress and coins are saved automatically.</p>
+    </div>
+  </div>
 
-    btnShop.onclick = () => openModal("shopModal");
-    btnCharacter.onclick = () => { updateOwned(); openModal("characterPanel"); };
-    btnBoard.onclick = () => openModal("leaderboard");
+  <!-- Options Modal -->
+  <div id="optionModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="optionTitle" tabindex="0">
+      <span class="closeBtn" id="closeOption" role="button" aria-label="Close Options">×</span>
+      <h2 id="optionTitle">Options</h2>
+      <label>
+        <input type="checkbox" id="toggleBGM" checked /> Background Music
+      </label>
+      <br />
+      <label>
+        <input type="checkbox" id="toggleSFX" checked /> Sound Effects
+      </label>
+    </div>
+  </div>
 
-    function showLobby() {
-      lobby.style.display = "flex";
-      closeModal("shopModal");
-      closeModal("characterPanel");
-      closeModal("leaderboard");
-      gameOverModal.style.display = "none";
-      jumpBtn.style.display = "none";
-      slideBtn.style.display = "none";
-      resetGame();
-    }
-
-    function resetGame() {
-      score = 0;
-      coins = 0;
-      obstacles.forEach(o => o.remove());
-      boxes.forEach(b => b.remove());
-      obstacles = [];
-      boxes = [];
-      jumping = false;
-      sliding = false;
-      velocityY = 0;
-      dino.style.bottom = groundBottom + "vh";
-      dino.style.height = "auto";
-      dino.classList.remove("slide");
-      dino.style.backgroundImage = `url(${selectedCharacter})`;
-      updateScore();
-    }
-
-    function startGame() {
-      lobby.style.display = "none";
-      gameOverModal.style.display = "none";
-      resetGame();
-      jumpBtn.style.display = "block";
-      slideBtn.style.display = "block";
-      if(gameInterval) clearInterval(gameInterval);
-      gameInterval = setInterval(gameLoop, 20);
-    }
-
-    function updateScore() {
-      scoreDisplay.textContent = "Score: " + score;
-      coinsDisplay.textContent = "Coins: " + coins;
-    }
-
-    function createObstacle() {
-      const obs = document.createElement("div");
-      obs.classList.add("obstacle");
-      obs.style.right = "-5vw";
-      document.getElementById("game").appendChild(obs);
-      obstacles.push(obs);
-    }
-
-    function createBox() {
-      const box = document.createElement("div");
-      box.classList.add("box");
-      box.style.right = "-4vw";
-      box.style.top = "30vh";
-      document.getElementById("game").appendChild(box);
-      boxes.push(box);
-    }
-
-    function isCollision(rect1, rect2) {
-      return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
-    }
-
-    function gameLoop() {
-      score++;
-      updateScore();
-
-      // สร้าง obstacle ห่างกันอย่างน้อย 30vw
-      if(Math.random() < 0.015) {
-        let canSpawn = true;
-        if(obstacles.length > 0) {
-          const lastObs = obstacles[obstacles.length - 1];
-          const lastObsRect = lastObs.getBoundingClientRect();
-          const gameWidth = document.getElementById("game").getBoundingClientRect().width;
-          const lastObsRightVW = (gameWidth - lastObsRect.right) / (gameWidth / 100);
-          if(lastObsRightVW < 30) canSpawn = false;
-        }
-        if(canSpawn) createObstacle();
-      }
-
-      if(Math.random() < 0.007) createBox();
-
-      obstacles.forEach((obs, i) => {
-        let right = parseFloat(obs.style.right);
-        right += gameSpeed;
-        obs.style.right = right + "vw";
-        if(right > 105) {
-          obs.remove();
-          obstacles.splice(i, 1);
-        } else {
-          if(isCollision(dino.getBoundingClientRect(), obs.getBoundingClientRect()) && !sliding) gameOver();
-        }
-      });
-
-      boxes.forEach((box, i) => {
-        let right = parseFloat(box.style.right);
-        right += gameSpeed;
-        box.style.right = right + "vw";
-        if(right > 105) {
-          box.remove();
-          boxes.splice(i, 1);
-        } else {
-          if(isCollision(dino.getBoundingClientRect(), box.getBoundingClientRect())) {
-            coins++;
-            popSound.currentTime = 0;
-            popSound.play();
-            box.remove();
-            boxes.splice(i, 1);
-            updateScore();
-          }
-        }
-      });
-
-      // ฟิสิกส์กระโดด
-      if (jumping) {
-        velocityY += gravity * 0.4;
-        let currentBottom = parseFloat(dino.style.bottom) || groundBottom;
-        currentBottom += velocityY * 0.4;
-
-        if (currentBottom <= groundBottom) {
-          currentBottom = groundBottom;
-          jumping = false;
-          velocityY = 0;
-        }
-        dino.style.bottom = currentBottom + "vh";
-      } else {
-        dino.style.bottom = groundBottom + "vh";
-      }
-    }
-
-    function gameOver() {
-      clearInterval(gameInterval);
-      gameOverModal.style.display = "flex";
-      jumpBtn.style.display = "none";
-      slideBtn.style.display = "none";
-    }
-
-    function jump() {
-      if(!jumping && !sliding) {
-        jumping = true;
-        velocityY = jumpVelocity;
-        jumpSound.currentTime = 0;
-        jumpSound.play();
-      }
-    }
-
-    function slide() {
-      if(!jumping && !sliding) {
-        sliding = true;
-        slideSound.currentTime = 0;
-        slideSound.play();
-        dino.classList.add("slide");
-        setTimeout(() => {
-          sliding = false;
-          dino.classList.remove("slide");
-        }, 700);
-      }
-    }
-
-    window.addEventListener("keydown", e => {
-      if(e.code === "ArrowUp" || e.code === "KeyW" || e.code === "Space") jump();
-      else if(e.code === "ArrowDown" || e.code === "KeyS") slide();
-    });
-
-    jumpBtn.onclick = jump;
-    slideBtn.onclick = slide;
-
-    // เล่นเพลงพื้นหลัง loop
-    const bgm = new Audio("pop.mp3");
-    bgm.loop = true;
-    bgm.volume = 0.5;
-    bgm.play().catch(() => {}); // ถ้า browser บล็อก autoplay เงียบๆไป
-
-    showLobby();
-    playBtn.onclick = startGame;
-  </script>
-</body>
-</html>
+  <!-- Game Over Modal -->
+  <div id="gameOver" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="gameOverTitle" tabindex="0" style="text-align:center;">
+      <h
