@@ -337,7 +337,21 @@
   <div id="lobby">
     <button id="playBtn" title="Start Game">Play</button>
     <div id="topMenu">
-      <button class="hexBtn" id="btn
+      <button class="hexBtn" id="btnCharacter" title="Characters">
+        <img src="character.png" alt="Character Icon" />
+        Characters
+      </button>
+      <button class="hexBtn" id="btnGuide" title="Guide">
+        <img src="guide.png" alt="Guide Icon" />
+        Guide
+      </button>
+      <button class="hexBtn" id="btnOption" title="Options">
+        <img src="option.png" alt="Option Icon" />
+        Options
+      </button>
+    </div>
+  </div>
+
 <script>
 (() => {
   // DOM elements
@@ -374,13 +388,14 @@
   let isJumping = false;
   let isSliding = false;
   let velocity = 0;
-  const gravity = -1.5;
-  const jumpForce = 25;
+  const gravity = 0.5;
+  const jumpForce = 15;
   let dinoY = 12; // vh bottom position
   const groundLevel = 12;
   const gameSpeed = 4; // ความเร็วเกม (vw/frame)
   let obstacles = [];
   let boxes = [];
+  let animationFrameId = null;
 
   // Sound control
   let bgmAudio = new Audio('bgm.mp3');
@@ -422,6 +437,7 @@
       {id: 'peet', name: 'Peet', price: 30, img: 'peet.png'},
       {id: 'broin', name: 'Broin', price: 50, img: 'broin.png'}
     ];
+    
     characters.forEach(char => {
       const hasChar = ownedCharacters.includes(char.id);
       const isSelected = selectedCharacter === char.id;
@@ -440,7 +456,6 @@
           localStorage.setItem('pasu_selectedChar', selectedCharacter);
           updateSelectedCharacter();
           updateCharacterUI();
-          alert(`Selected character: ${char.name}`);
         } else {
           // Buy prompt
           if (coins >= char.price) {
@@ -454,7 +469,6 @@
               coinCountEl.textContent = coins;
               updateCharacterUI();
               updateSelectedCharacter();
-              alert(`You bought ${char.name}!`);
             }
           } else {
             alert('Not enough coins!');
@@ -519,7 +533,12 @@
     isSliding = false;
     lobby.style.display = 'none';
     scoreEl.style.display = 'block';
+    scoreEl.textContent = 'Score: 0';
     gameOverEl.style.display = 'none';
+    dino.classList.remove('slide');
+
+    // Clear existing obstacles and boxes
+    document.querySelectorAll('.obstacle, .box').forEach(el => el.remove());
 
     // Show jump/slide buttons on mobile
     if (isMobile) {
@@ -527,9 +546,13 @@
       slideBtn.style.display = 'block';
     }
     
-    if (bgmEnabled) bgmAudio.play().catch(() => {});
+    if (bgmEnabled) {
+      bgmAudio.currentTime = 0;
+      bgmAudio.play().catch(() => {});
+    }
 
-    requestAnimationFrame(gameLoop);
+    frameCount = 0;
+    animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   function endGame() {
@@ -537,21 +560,31 @@
     gameOverEl.style.display = 'flex';
     jumpBtn.style.display = 'none';
     slideBtn.style.display = 'none';
+    cancelAnimationFrame(animationFrameId);
   }
 
   // Jump and slide controls
   function jump() {
+    if (!isPlaying) return;
     if (!isJumping && !isSliding) {
       isJumping = true;
       velocity = jumpForce;
-      if (sfxEnabled) sfxJump.play();
+      if (sfxEnabled) {
+        sfxJump.currentTime = 0;
+        sfxJump.play();
+      }
     }
   }
+  
   function slide() {
+    if (!isPlaying) return;
     if (!isSliding && !isJumping) {
       isSliding = true;
       dino.classList.add('slide');
-      if (sfxEnabled) sfxSlide.play();
+      if (sfxEnabled) {
+        sfxSlide.currentTime = 0;
+        sfxSlide.play();
+      }
       setTimeout(() => {
         isSliding = false;
         dino.classList.remove('slide');
@@ -569,14 +602,22 @@
     gameOverEl.style.display = 'none';
     lobby.style.display = 'flex';
     scoreEl.style.display = 'none';
+    if (bgmEnabled) {
+      bgmAudio.currentTime = 0;
+      bgmAudio.play().catch(() => {});
+    }
   });
 
   jumpBtn.addEventListener('click', jump);
   slideBtn.addEventListener('click', slide);
 
   window.addEventListener('keydown', e => {
+    if (!isPlaying && e.code === 'Space') {
+      startGame();
+      return;
+    }
     if (!isPlaying) return;
-    if (e.code === 'ArrowUp' || e.code === 'KeyW') jump();
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') jump();
     else if (e.code === 'ArrowDown' || e.code === 'KeyS') slide();
   });
 
@@ -591,9 +632,9 @@
 
     // Dino jump physics
     if (isJumping) {
-      dinoY += velocity * 0.3; // scaled for vh
-      velocity += gravity * 0.3;
-      if (dinoY <= groundLevel) {
+      dinoY -= velocity;
+      velocity -= gravity;
+      if (dinoY >= groundLevel) {
         dinoY = groundLevel;
         isJumping = false;
         velocity = 0;
@@ -601,18 +642,18 @@
     }
     dino.style.bottom = `${dinoY}vh`;
 
-    // Spawn obstacles every 200 frames
-    if (frameCount % 200 === 0) {
+    // Spawn obstacles randomly
+    if (Math.random() < 0.008) { // ~1% chance per frame
       spawnObstacle();
     }
-    // Spawn boxes every 350 frames
-    if (frameCount % 350 === 0) {
+    // Spawn boxes randomly
+    if (Math.random() < 0.005) { // ~0.5% chance per frame
       spawnBox();
     }
 
     // Move obstacles
     obstacles.forEach((ob, i) => {
-      ob.x -= gameSpeed * 0.1;
+      ob.x -= gameSpeed;
       if (ob.x < -10) {
         ob.element.remove();
         obstacles.splice(i, 1);
@@ -623,7 +664,7 @@
 
     // Move boxes
     boxes.forEach((box, i) => {
-      box.x -= gameSpeed * 0.1;
+      box.x -= gameSpeed;
       if (box.x < -10) {
         box.element.remove();
         boxes.splice(i, 1);
@@ -635,7 +676,7 @@
     // Collision detection
     checkCollisions();
 
-    requestAnimationFrame(gameLoop);
+    animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   function spawnObstacle() {
@@ -665,19 +706,24 @@
         return;
       }
     }
+    
     // Check box collision
-    boxes.forEach((box, i) => {
+    for (let i = boxes.length - 1; i >= 0; i--) {
+      const box = boxes[i];
       const boxRect = box.element.getBoundingClientRect();
       if (rectOverlap(dinoRect, boxRect)) {
         // Collect coin
         coins++;
         localStorage.setItem('pasu_coins', coins);
         coinCountEl.textContent = coins;
-        if (sfxEnabled) sfxCoin.play();
+        if (sfxEnabled) {
+          sfxCoin.currentTime = 0;
+          sfxCoin.play();
+        }
         box.element.remove();
-        boxes.splice(i,1);
+        boxes.splice(i, 1);
       }
-    });
+    }
   }
 
   function rectOverlap(r1, r2) {
@@ -688,9 +734,18 @@
   }
 
   // Initialize on page load
-  window.onload = () => {
+  window.addEventListener('load', () => {
     initUI();
-  };
+    
+    // Handle visibility change to pause audio when tab is inactive
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && bgmEnabled) {
+        bgmAudio.pause();
+      } else if (!document.hidden && bgmEnabled && isPlaying) {
+        bgmAudio.play().catch(() => {});
+      }
+    });
+  });
 
 })();
 </script>
@@ -729,15 +784,16 @@
 <!-- Game Over Modal -->
 <div id="gameOver" style="display:none;flex-direction:column;justify-content:center;align-items:center;position:fixed;inset:0;background:rgba(0,0,0,0.75);color:white;font-size:32px;font-weight:700;z-index:500;">
   <div>Game Over</div>
-  <button id="restartBtn" class="restartBtn" style="margin: 12px; padding: 14px 48px; font-size: 20px; border: none; border-radius: 14px; background: #3A8E3A; color: white; box-shadow: 0 0 8px #2F6F2F; cursor:pointer;">Restart</button>
-  <button id="backLobbyBtn" class="lobbyBtn" style="margin: 12px; padding: 14px 48px; font-size: 20px; border: none; border-radius: 14px; background: #B33A3A; color: white; box-shadow: 0 0 8px #7A2424; cursor:pointer;">Back to Lobby</button>
+  <div id="finalScore" style="margin-bottom: 20px;">Score: 0</div>
+  <button id="restartBtn" class="restartBtn">Restart</button>
+  <button id="backLobbyBtn" class="lobbyBtn">Back to Lobby</button>
 </div>
 
 <!-- Jump and Slide Buttons -->
-<button id="jumpBtn" title="Jump" aria-label="Jump" style="display:none; position: fixed; bottom: 20px; right: 110px; width: 90px; height: 90px; border-radius: 50%; background-image: url('jump.png'); background-size: contain; background-position: center; background-repeat: no-repeat; border: none; cursor: pointer; z-index: 220;"></button>
-<button id="slideBtn" title="Slide" aria-label="Slide" style="display:none; position: fixed; bottom: 20px; right: 20px; width: 90px; height: 90px; border-radius: 50%; background-image: url('slide.png'); background-size: contain; background-position: center; background-repeat: no-repeat; border: none; cursor: pointer; z-index: 220;"></button>
+<button id="jumpBtn" title="Jump" aria-label="Jump"></button>
+<button id="slideBtn" title="Slide" aria-label="Slide"></button>
 
 </div> <!-- end #game -->
 
 </body>
-             </html>
+</html>
