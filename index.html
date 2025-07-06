@@ -3,21 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame - Dino Run Full</title>
+<title>PasuGame Full (Slower Speed + Full Features)</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
 
-  /* Reset */
-  * {
-    box-sizing: border-box;
-  }
-
+  /* Reset and basics */
+  * { box-sizing: border-box; }
   body, html {
-    margin: 0; padding: 0; height: 100%;
+    margin:0; padding:0; height:100%;
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
     background: #335544;
     overflow: hidden;
-    user-select: none;
   }
 
   #game {
@@ -25,9 +21,9 @@
     width: 100vw;
     height: 100vh;
     background: url("Background.webp") no-repeat center center/cover;
-    overflow: hidden;
   }
 
+  /* Ground */
   #ground {
     position: absolute;
     bottom: 0;
@@ -37,6 +33,7 @@
     z-index: 10;
   }
 
+  /* Chibi cat bottom left */
   #chibiCat {
     position: absolute;
     bottom: 12vh;
@@ -52,6 +49,7 @@
     50% { transform: translateY(-0.5vh); }
   }
 
+  /* Coin Bar Top Left */
   #coinBar {
     position: fixed;
     top: 10px;
@@ -67,41 +65,31 @@
     font-weight: 700;
     font-size: 20px;
     user-select: none;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 0 6px #FFC800;
   }
   #coinBar img {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
   }
 
+  /* Lobby overlay with faded game bg */
   #lobby {
     position: absolute;
     inset: 0;
-    background: url("Background.webp") no-repeat center center/cover;
-    filter: brightness(0.35);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 150;
-    padding: 0 20px;
-  }
-
-  #lobbyContent {
-    position: absolute;
-    inset: 0;
     background:
-      linear-gradient(to bottom, rgba(51, 68, 68, 0.9), rgba(10, 20, 10, 0.95));
+      linear-gradient(to bottom, rgba(51, 68, 68, 0.85), rgba(10, 20, 10, 0.9)),
+      url("Background.webp") no-repeat center center/cover;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 25px;
-    z-index: 160;
+    z-index: 200;
     padding: 0 20px;
   }
 
+  /* Play Button */
   #playBtn {
+    margin-top: 15vh;
     background: linear-gradient(145deg, #D97448, #B14B1C);
     border: 3px solid #7A3B24;
     border-radius: 24px;
@@ -114,39 +102,33 @@
     user-select: none;
     text-shadow: 1px 1px 2px #511E0A;
     transition: transform 0.15s ease;
-    font-family: 'Comic Neue', cursive, Arial, sans-serif;
   }
   #playBtn:hover { transform: scale(1.05); }
   #playBtn:active { transform: scale(0.95); }
 
+  /* Top right hex menu */
   #topMenu {
     position: fixed;
     top: 10px;
     right: 20px;
     display: flex;
     gap: 16px;
-    z-index: 200;
+    z-index: 1001;
   }
-
   .hexBtn {
     --hex-size: 72px;
     width: var(--hex-size);
     height: calc(var(--hex-size) * 1.15);
     background: #C16E33;
     border: 3px solid #7A3B24;
-    clip-path: polygon(
-      25% 5%, 75% 5%,
-      100% 50%, 75% 95%,
-      25% 95%, 0% 50%
-    );
+    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
     cursor: pointer;
-    position: relative;
-    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
     user-select: none;
   }
   .hexBtn:hover { background: #D97448; }
@@ -161,6 +143,7 @@
     text-shadow: 0 0 4px #511E0A;
   }
 
+  /* Modal backgrounds */
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -168,9 +151,8 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 300;
+    z-index: 1500;
   }
-
   .modal-panel {
     background: #fef8ef;
     border-radius: 14px;
@@ -182,7 +164,6 @@
     overflow-y: auto;
     position: relative;
   }
-
   .closeBtn {
     position: absolute;
     top: 12px;
@@ -196,6 +177,7 @@
   }
   .closeBtn:hover { color: #FF5555; }
 
+  /* Character list */
   #ownedCharacters {
     display: flex;
     flex-wrap: wrap;
@@ -212,7 +194,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    user-select: none;
   }
   .charItem img {
     width: 80px;
@@ -235,71 +216,19 @@
     text-shadow: 0 0 2px #512F07;
     transition: background 0.2s ease;
   }
-  .charItem button:hover {
-    background: #D97448;
-  }
+  .charItem button:hover { background: #D97448; }
 
-  #confirmBuyModal .modal-panel {
-    max-width: 380px;
-    text-align: center;
-  }
-  #confirmBuyModal .modal-panel h3 {
-    margin-bottom: 18px;
-  }
-  #confirmBuyModal .btnConfirm {
-    margin: 8px 14px;
-    padding: 10px 36px;
-    font-weight: 700;
-    font-size: 18px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    color: white;
-    text-shadow: 0 0 3px #4f360b;
-    transition: background 0.2s ease;
-  }
-  #confirmYesBtn {
-    background: #3A8E3A;
-  }
-  #confirmYesBtn:hover {
-    background: #5CC75C;
-  }
-  #confirmNoBtn {
-    background: #B33A3A;
-  }
-  #confirmNoBtn:hover {
-    background: #FF5555;
-  }
-
-  #guideModal .modal-panel {
-    font-size: 16px;
-    line-height: 1.5;
-  }
-  #guideModal .modal-panel h2 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    color: #7A3B24;
-  }
-  #guideModal .modal-panel img {
-    width: 100%;
-    border-radius: 14px;
-    margin: 14px 0;
-    box-shadow: 0 0 8px #B47E29;
-  }
-
+  /* Game UI */
   #score {
     position: fixed;
-    top: 60px;
-    left: 10px;
+    top: 10px;
+    right: 20px;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 20px;
     color: white;
     text-shadow: 0 0 5px #4C2600;
     user-select: none;
-    z-index: 200;
-  }
-  #coinBar {
-    z-index: 200;
+    z-index: 1000;
   }
 
   #dino {
@@ -316,6 +245,7 @@
     height: calc(14vw * 0.5) !important;
   }
 
+  /* Jump and Slide buttons */
   #jumpBtn, #slideBtn {
     position: fixed;
     bottom: 20px;
@@ -339,6 +269,7 @@
     background-image: url("slide.png");
   }
 
+  /* Obstacles */
   .obstacle {
     position: absolute;
     bottom: 12vh;
@@ -348,7 +279,6 @@
     border-radius: 0.5vw;
     z-index: 15;
   }
-
   .box {
     position: absolute;
     bottom: 20vh;
@@ -360,6 +290,7 @@
     z-index: 15;
   }
 
+  /* Game Over modal */
   #gameOver {
     position: fixed;
     inset: 0;
@@ -371,7 +302,7 @@
     color: white;
     font-size: 32px;
     font-weight: 700;
-    z-index: 400;
+    z-index: 500;
   }
   #gameOver button {
     margin: 12px;
@@ -393,748 +324,102 @@
     color: white;
     box-shadow: 0 0 8px #7A2424;
   }
-
-  #playBtn, .hexBtn, .closeBtn, #confirmYesBtn, #confirmNoBtn, .charItem button, #jumpBtn, #slideBtn {
-    pointer-events: auto !important;
-    position: relative !important;
-    z-index: 500 !important;
-  }
-  #lobby {
-    pointer-events: none;
-  }
-  #lobby > * {
-    pointer-events: auto;
-  }
-
-  @media (max-width: 700px) {
-    #playBtn {
-      padding: 14px 70px;
-      font-size: 36px;
-    }
-    .hexBtn {
-      --hex-size: 60px;
-      height: calc(var(--hex-size) * 1.15);
-    }
-    #dino {
-      width: 24vw;
-    }
-    #jumpBtn, #slideBtn {
-      width: 70px;
-      height: 70px;
-      bottom: 15px;
-    }
-  }
 </style>
 </head>
 <body>
+
 <div id="game">
   <div id="ground"></div>
   <div id="chibiCat" title="Your cute cat character"></div>
 
-  <div id="coinBar" title="Fish Coins" style="display:flex;">
+  <div id="coinBar" title="Fish Coins">
     <img src="coin.png" alt="Coin Icon" />
     <span id="coinCount">0</span>
   </div>
 
-  <div id="score" title="Score">Score: 0</div>
+  <div id="score" title="Score" style="display:none;">Score: 0</div>
 
   <div id="dino"></div>
 
-  <div id="lobby" aria-label="Game Lobby" role="main">
-    <div id="lobbyContent">
-      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Enter your player name" autocomplete="off" />
-      <button id="playBtn" title="Start Game" aria-label="Start Game Button">Play</button>
-    </div>
-    <div id="topMenu" role="navigation" aria-label="Top Menu">
-      <button class="hexBtn" id="btnCharacter" title="Characters" aria-label="Characters Button">
+  <!-- Lobby -->
+  <div id="lobby">
+    <button id="playBtn" title="Start Game">Play</button>
+
+    <div id="topMenu">
+      <button class="hexBtn" id="btnCharacter" title="Characters">
         <img src="modelIcon.png" alt="Character Icon" />
         <span>Character</span>
       </button>
-      <button class="hexBtn" id="btnRank" title="Leaderboard" aria-label="Leaderboard Button">
-        <img src="rankIcon.png" alt="Leaderboard Icon" />
+      <button class="hexBtn" id="btnRank" title="Leaderboard">
+        <img src="rankIcon.png" alt="Rank Icon" />
         <span>Rank</span>
       </button>
-      <button class="hexBtn" id="btnGuide" title="Guide" aria-label="Guide Button">
+      <button class="hexBtn" id="btnGuide" title="Guide">
         <img src="guideIcon.png" alt="Guide Icon" />
         <span>Guide</span>
       </button>
-      <button class="hexBtn" id="btnOption" title="Option" aria-label="Option Button">
+      <button class="hexBtn" id="btnOption" title="Options">
         <img src="optionIcon.png" alt="Option Icon" />
         <span>Option</span>
       </button>
     </div>
   </div>
 
+  <!-- Modals -->
+
   <!-- Character Modal -->
-  <div class="modal-bg" id="characterModal" role="dialog" aria-modal="true" aria-labelledby="characterModalTitle">
-    <div class="modal-panel">
-      <span class="closeBtn" id="closeCharacterModal" role="button" tabindex="0" aria-label="Close Characters">&times;</span>
-      <h2 id="characterModalTitle">Characters</h2>
+  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="characterTitle" tabindex="0">
+      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
+      <h2 id="characterTitle">Characters</h2>
       <div id="ownedCharacters"></div>
     </div>
   </div>
 
-  <!-- Leaderboard Modal -->
-  <div class="modal-bg" id="rankModal" role="dialog" aria-modal="true" aria-labelledby="rankModalTitle">
-    <div class="modal-panel">
-      <span class="closeBtn" id="closeRankModal" role="button" tabindex="0" aria-label="Close Leaderboard">&times;</span>
-      <h2 id="rankModalTitle">Leaderboard (Coming soon...)</h2>
-      <p style="text-align:center; font-style: italic;">Feature under development.</p>
-    </div>
-  </div>
-
   <!-- Guide Modal -->
-  <div class="modal-bg" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
-    <div class="modal-panel">
-      <span class="closeBtn" id="closeGuideModal" role="button" tabindex="0" aria-label="Close Guide">&times;</span>
-      <h2 id="guideModalTitle">Game Guide</h2>
-      <p>Jump over obstacles by tapping the jump button or pressing the spacebar. Slide to avoid low obstacles.</p>
-      <p>Collect fish coins from boxes to buy new characters in the Character menu.</p>
-      <img src="guide_jump.png" alt="Jump Example" />
-      <img src="guide_slide.png" alt="Slide Example" />
+  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="guideTitle" tabindex="0">
+      <span class="closeBtn" id="closeGuide" role="button" aria-label="Close Guide Modal">×</span>
+      <h2 id="guideTitle">Game Guide</h2>
+      <p>Welcome to PasuGame! Avoid obstacles and collect boxes for coins.</p>
+      <img src="guide1.png" alt="Guide Image 1" style="width:100%; margin-bottom:10px;"/>
+      <p>Use jump and slide buttons or keyboard keys W/S or arrows.</p>
+      <img src="guide2.png" alt="Guide Image 2" style="width:100%; margin-bottom:10px;"/>
+      <p>Buy characters with coins in Character menu.</p>
     </div>
   </div>
 
   <!-- Option Modal -->
-  <div class="modal-bg" id="optionModal" role="dialog" aria-modal="true" aria-labelledby="optionModalTitle">
-    <div class="modal-panel">
-      <span class="closeBtn" id="closeOptionModal" role="button" tabindex="0" aria-label="Close Options">&times;</span>
-      <h2 id="optionModalTitle">Options</h2>
-      <label><input type="checkbox" id="toggleBGM" checked /> Background Music</label><br />
+  <div id="optionModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-panel" role="document" aria-labelledby="optionTitle" tabindex="0">
+      <span class="closeBtn" id="closeOption" role="button" aria-label="Close Options">×</span>
+      <h2 id="optionTitle">Options</h2>
+      <label><input type="checkbox" id="toggleBGM" checked /> Background Music</label><br/>
       <label><input type="checkbox" id="toggleSFX" checked /> Sound Effects</label>
     </div>
   </div>
 
-  <!-- Confirm Buy Modal -->
-  <div class="modal-bg" id="confirmBuyModal" role="dialog" aria-modal="true" aria-labelledby="confirmBuyModalTitle">
-    <div class
-      <!-- (ต่อจาก Part 1) -->
-<div class="modal-panel" id="confirmBuyModal" role="dialog" aria-modal="true" aria-labelledby="confirmBuyModalTitle">
-  <span class="closeBtn" id="closeConfirmBuyModal" role="button" tabindex="0" aria-label="Close Confirm Buy">&times;</span>
-  <h3 id="confirmBuyModalTitle">Confirm Purchase</h3>
-  <p id="confirmBuyText"></p>
-  <button class="btnConfirm" id="confirmYesBtn">Yes</button>
-  <button class="btnConfirm" id="confirmNoBtn">No</button>
-</div>
-</div>
-
-<!-- Game Over Screen -->
-<div id="gameOver" role="alertdialog" aria-modal="true" aria-labelledby="gameOverTitle">
-  <div>
-    <h1 id="gameOverTitle">Game Over</h1>
-    <p id="finalScoreText">Score: 0</p>
-    <button class="restartBtn" id="restartBtn">Restart</button>
-    <button class="lobbyBtn" id="goLobbyBtn">Back to Lobby</button>
+  <!-- Game Over -->
+  <div id="gameOver" style="display:none;flex-direction:column;justify-content:center;align-items:center;position:fixed;inset:0;background:rgba(0,0,0,0.75);color:white;font-size:32px;font-weight:700;z-index:500;">
+    <div>Game Over</div>
+    <button id="restartBtn" class="restartBtn">Restart</button>
+    <button id="backLobbyBtn" class="lobbyBtn">Back to Lobby</button>
   </div>
+
+  <!-- Jump and Slide buttons -->
+  <button id="jumpBtn" title="Jump" aria-label="Jump" style="display:none;"></button>
+  <button id="slideBtn" title="Slide" aria-label="Slide" style="display:none;"></button>
 </div>
-
-<!-- Jump and Slide Buttons for Mobile -->
-<button id="jumpBtn" aria-label="Jump Button" title="Jump"></button>
-<button id="slideBtn" aria-label="Slide Button" title="Slide"></button>
-
-</div> <!-- end #game -->
 
 <script>
 (() => {
-  // === Constants and Globals ===
-  const game = document.getElementById('game');
-  const dino = document.getElementById('dino');
-  const ground = document.getElementById('ground');
-  const chibiCat = document.getElementById('chibiCat');
-  const coinCountEl = document.getElementById('coinCount');
-  const scoreEl = document.getElementById('score');
-  const lobby = document.getElementById('lobby');
-  const playerNameInput = document.getElementById('playerNameInput');
-  const playBtn = document.getElementById('playBtn');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const slideBtn = document.getElementById('slideBtn');
-  const gameOverScreen = document.getElementById('gameOver');
-  const finalScoreText = document.getElementById('finalScoreText');
-  const restartBtn = document.getElementById('restartBtn');
-  const goLobbyBtn = document.getElementById('goLobbyBtn');
-
-  // Modals and buttons
-  const btnCharacter = document.getElementById('btnCharacter');
-  const btnRank = document.getElementById('btnRank');
-  const btnGuide = document.getElementById('btnGuide');
-  const btnOption = document.getElementById('btnOption');
-
-  const characterModal = document.getElementById('characterModal');
-  const closeCharacterModal = document.getElementById('closeCharacterModal');
-
-  const rankModal = document.getElementById('rankModal');
-  const closeRankModal = document.getElementById('closeRankModal');
-
-  const guideModal = document.getElementById('guideModal');
-  const closeGuideModal = document.getElementById('closeGuideModal');
-
-  const optionModal = document.getElementById('optionModal');
-  const closeOptionModal = document.getElementById('closeOptionModal');
-
-  const confirmBuyModal = document.getElementById('confirmBuyModal');
-  const closeConfirmBuyModal = document.getElementById('closeConfirmBuyModal');
-  const confirmBuyText = document.getElementById('confirmBuyText');
-  const confirmYesBtn = document.getElementById('confirmYesBtn');
-  const confirmNoBtn = document.getElementById('confirmNoBtn');
-
-  const ownedCharactersContainer = document.getElementById('ownedCharacters');
-
-  // Sound effects
-  const sfxJump = new Audio('jump.mp3');
-  const sfxSlide = new Audio('slide.mp3');
-  const sfxCoin = new Audio('box.mp3');
-  const bgm = new Audio('bgm.mp3');
-  bgm.loop = true;
-  bgm.volume = 0.3;
-
-  // Game state variables
-  let coins = 0;
-  let score = 0;
-  let gameSpeed = 5; // pixels per frame base speed
-  let obstacleTimer = 0;
-  let obstacleInterval = 1500; // ms between obstacle spawns
-  let boxTimer = 0;
-  let boxInterval = 5000;
-  let obstacles = [];
-  let boxes = [];
-  let jumping = false;
-  let sliding = false;
-  let jumpVelocity = 0;
-  let gravity = 0.8;
-  let jumpPower = 18;
-  let isGameRunning = false;
-  let animationFrameId = null;
-  let playerName = '';
-  let ownedCharacters = {};
-  let selectedCharacter = 'myDino.png'; // default
-
-  // Settings
-  let bgmEnabled = true;
-  let sfxEnabled = true;
-
-  // Local Storage Keys
-  const LS_PLAYERNAME = 'PasuGame_PlayerName';
-  const LS_COINS = 'PasuGame_Coins';
-  const LS_OWNED_CHARS = 'PasuGame_OwnedCharacters';
-  const LS_SELECTED_CHAR = 'PasuGame_SelectedCharacter';
-  const LS_HIGH_SCORE = 'PasuGame_HighScore';
-  const LS_BGM = 'PasuGame_BGM';
-  const LS_SFX = 'PasuGame_SFX';
-
-  // === Utility Functions ===
-  function saveToStorage() {
-    localStorage.setItem(LS_PLAYERNAME, playerName);
-    localStorage.setItem(LS_COINS, coins);
-    localStorage.setItem(LS_OWNED_CHARS, JSON.stringify(ownedCharacters));
-    localStorage.setItem(LS_SELECTED_CHAR, selectedCharacter);
-    localStorage.setItem(LS_HIGH_SCORE, Math.max(score, getHighScore()));
-    localStorage.setItem(LS_BGM, bgmEnabled ? '1' : '0');
-    localStorage.setItem(LS_SFX, sfxEnabled ? '1' : '0');
-  }
-  function loadFromStorage() {
-    playerName = localStorage.getItem(LS_PLAYERNAME) || '';
-    coins = parseInt(localStorage.getItem(LS_COINS)) || 0;
-    ownedCharacters = JSON.parse(localStorage.getItem(LS_OWNED_CHARS) || '{}');
-    selectedCharacter = localStorage.getItem(LS_SELECTED_CHAR) || 'myDino.png';
-    bgmEnabled = localStorage.getItem(LS_BGM) === '0' ? false : true;
-    sfxEnabled = localStorage.getItem(LS_SFX) === '0' ? false : true;
-    if(!ownedCharacters['myDino.png']) {
-      ownedCharacters['myDino.png'] = true; // default character owned
-    }
-  }
-  function getHighScore() {
-    return parseInt(localStorage.getItem(LS_HIGH_SCORE)) || 0;
-  }
-  function updateCoinDisplay() {
-    coinCountEl.textContent = coins;
-  }
-  function updateScoreDisplay() {
-    scoreEl.textContent = `Score: ${score}`;
-  }
-  function playSound(audio) {
-    if(sfxEnabled) {
-      audio.currentTime = 0;
-      audio.play();
-    }
-  }
-
-  // === Game Functions ===
-
-  function startGame() {
-    if (!playerName.trim()) {
-      alert('Please enter your name to start!');
-      return;
-    }
-    lobby.style.display = 'none';
-    jumpBtn.style.display = 'block';
-    slideBtn.style.display = 'block';
-    isGameRunning = true;
-    score = 0;
-    obstacleTimer = 0;
-    boxTimer = 0;
-    obstacles.forEach(o => o.remove());
-    obstacles = [];
-    boxes.forEach(b => b.remove());
-    boxes = [];
-    updateScoreDisplay();
-    updateCoinDisplay();
-    dino.style.backgroundImage = `url("${selectedCharacter}")`;
-    dino.style.bottom = '12vh';
-    jumping = false;
-    sliding = false;
-    jumpVelocity = 0;
-    if (bgmEnabled) bgm.play();
-    animationFrameId = requestAnimationFrame(gameLoop);
-  }
-
-  function endGame() {
-    isGameRunning = false;
-    if (bgmEnabled) bgm.pause();
-    cancelAnimationFrame(animationFrameId);
-    animationFrameId = null;
-    finalScoreText.textContent = `Score: ${score}`;
-    gameOverScreen.style.display = 'flex';
-    if(score > getHighScore()) {
-      localStorage.setItem(LS_HIGH_SCORE, score);
-      alert(`New High Score! ${score}`);
-    }
-    saveToStorage();
-  }
-
-  function gameLoop(timestamp) {
-    if (!isGameRunning) return;
-
-    // Move obstacles and boxes to left
-    obstacles.forEach(obs => {
-      let posX = parseFloat(obs.style.left);
-      posX -= gameSpeed;
-      obs.style.left = posX + 'px';
-      if(posX + obs.offsetWidth < 0) {
-        obs.remove();
-        obstacles = obstacles.filter(o => o !== obs);
-      }
-    });
-
-    boxes.forEach(box => {
-      let posX = parseFloat(box.style.left);
-      posX -= gameSpeed;
-      box.style.left = posX + 'px';
-      if(posX + box.offsetWidth < 0) {
-        box.remove();
-        boxes = boxes.filter(b => b !== box);
-      }
-    });
-
-    // Spawn obstacles randomly
-    obstacleTimer += 16.67;
-    if(obstacleTimer > obstacleInterval) {
-      obstacleTimer = 0;
-      spawnObstacle();
-    }
-
-    // Spawn boxes randomly
-    boxTimer += 16.67;
-    if(boxTimer > boxInterval) {
-      boxTimer = 0;
-      spawnBox();
-    }
-
-    // Handle jump physics
-    if(jumping) {
-      let bottomPx = parseFloat(dino.style.bottom);
-      jumpVelocity -= gravity;
-      bottomPx += jumpVelocity;
-      if(bottomPx <= 12 * window.innerHeight / 100) {
-        bottomPx = 12 * window.innerHeight / 100;
-        jumping = false;
-        jumpVelocity = 0;
-      }
-      dino.style.bottom = bottomPx + 'px';
-    }
-
-    // Handle slide
-    if(sliding) {
-      dino.classList.add('slide');
-    } else {
-      dino.classList.remove('slide');
-    }
-
-    // Update score
-    score += 1;
-    updateScoreDisplay();
-
-    // Collision detection
-    if(checkCollision()) {
-      endGame();
-      return;
-    }
-
-    animationFrameId = requestAnimationFrame(gameLoop);
-  }
-
-  // Obstacle creation
-  function spawnObstacle() {
-    const obstacle = document.createElement('div');
-    obstacle.classList.add('obstacle');
-    obstacle.style.left = window.innerWidth + 'px';
-    obstacle.style.bottom = '12vh';
-    game.appendChild(obstacle);
-    obstacles.push(obstacle);
-  }// --- Part 3: Full JavaScript Game Logic ---
-
-(() => {
-  const game = document.getElementById('game');
+  // DOM elements
   const lobby = document.getElementById('lobby');
   const playBtn = document.getElementById('playBtn');
-  const playerNameInput = document.getElementById('playerNameInput');
-  const coinCountSpan = document.getElementById('coinCount');
-  const scoreDisplay = document.getElementById('score');
-  const dino = document.getElementById('dino');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const slideBtn = document.getElementById('slideBtn');
-
   const characterModal = document.getElementById('characterModal');
-  const rankModal = document.getElementById('rankModal');
   const guideModal = document.getElementById('guideModal');
   const optionModal = document.getElementById('optionModal');
-
-  const btnCharacter = document.getElementById('btnCharacter');
-  const btnRank = document.getElementById('btnRank');
-  const btnGuide = document.getElementById('btnGuide');
-  const btnOption = document.getElementById('btnOption');
-
-  const closeCharacterModal = document.getElementById('closeCharacterModal');
-  const closeRankModal = document.getElementById('closeRankModal');
-  const closeGuideModal = document.getElementById('closeGuideModal');
-  const closeOptionModal = document.getElementById('closeOptionModal');
-
-  const gameOverScreen = document.getElementById('gameOver') || createGameOverScreen();
-  const restartBtn = document.createElement('button');
-  const lobbyBtn = document.createElement('button');
-
-  // Game variables
-  let gameRunning = false;
-  let playerName = '';
-  let score = 0;
-  let highScores = {}; // { playerName: highScore }
-  let coins = 0;
-  let ownedCharacters = ['myDino.png']; // default owned
-  let currentCharacter = 'myDino.png';
-
-  // Jump/slide state
-  let isJumping = false;
-  let isSliding = false;
-  let jumpHeight = 120; // px
-  let jumpDuration = 500; // ms
-  let slideDuration = 600; // ms
-
-  // Obstacle management
-  let obstacles = [];
-  let obstacleInterval = null;
-  const obstacleSpawnMinGap = 1600; // ms
-  const obstacleSpawnMaxGap = 3000; // ms
-
-  // Sound effects
-  const sfxJump = new Audio('jump.mp3');
-  const sfxSlide = new Audio('slide.mp3');
-  const sfxCoin = new Audio('box.mp3');
-
-  // Settings
-  let isBgmOn = true;
-  let isSfxOn = true;
-
-  // Load data from localStorage
-  function loadData() {
-    const storedName = localStorage.getItem('PasuGamePlayerName');
-    if(storedName) playerName = storedName;
-    playerNameInput.value = playerName;
-
-    const storedHighScores = localStorage.getItem('PasuGameHighScores');
-    if(storedHighScores) highScores = JSON.parse(storedHighScores);
-
-    const storedCoins = localStorage.getItem('PasuGameCoins');
-    if(storedCoins) coins = parseInt(storedCoins);
-
-    const storedOwnedChars = localStorage.getItem('PasuGameOwnedChars');
-    if(storedOwnedChars) ownedCharacters = JSON.parse(storedOwnedChars);
-
-    const storedCurrentChar = localStorage.getItem('PasuGameCurrentChar');
-    if(storedCurrentChar) currentCharacter = storedCurrentChar;
-
-    const storedBgm = localStorage.getItem('PasuGameBGM');
-    if(storedBgm) isBgmOn = storedBgm === 'true';
-
-    const storedSfx = localStorage.getItem('PasuGameSFX');
-    if(storedSfx) isSfxOn = storedSfx === 'true';
-
-    updateUI();
-  }
-
-  // Save data to localStorage
-  function saveData() {
-    localStorage.setItem('PasuGamePlayerName', playerName);
-    localStorage.setItem('PasuGameHighScores', JSON.stringify(highScores));
-    localStorage.setItem('PasuGameCoins', coins.toString());
-    localStorage.setItem('PasuGameOwnedChars', JSON.stringify(ownedCharacters));
-    localStorage.setItem('PasuGameCurrentChar', currentCharacter);
-    localStorage.setItem('PasuGameBGM', isBgmOn.toString());
-    localStorage.setItem('PasuGameSFX', isSfxOn.toString());
-  }
-
-  // UI update function
-  function updateUI() {
-    coinCountSpan.textContent = coins.toString();
-    scoreDisplay.textContent = `Score: ${score}`;
-    dino.style.backgroundImage = `url('${currentCharacter}')`;
-  }
-
-  // Show/hide modals
-  function showModal(modal) {
-    modal.style.display = 'flex';
-  }
-  function hideModal(modal) {
-    modal.style.display = 'none';
-  }
-
-  // Start the game
-  function startGame() {
-    if (!playerName.trim()) {
-      alert('Please enter your name first.');
-      return;
-    }
-    playerNameInput.style.display = 'none';
-    playBtn.style.display = 'none';
-    lobby.style.display = 'none';
-    jumpBtn.style.display = 'block';
-    slideBtn.style.display = 'block';
-    score = 0;
-    updateUI();
-    gameRunning = true;
-    clearObstacles();
-    spawnObstacle();
-    obstacleInterval = setInterval(spawnObstacle, getRandomInt(obstacleSpawnMinGap, obstacleSpawnMaxGap));
-    // Start game loop
-    requestAnimationFrame(gameLoop);
-  }
-
-  // Stop the game
-  function endGame() {
-    gameRunning = false;
-    clearInterval(obstacleInterval);
-    showGameOver();
-  }
-
-  // Game over screen creation if missing
-  function createGameOverScreen() {
-    const goScreen = document.createElement('div');
-    goScreen.id = 'gameOver';
-    goScreen.style.display = 'none';
-    goScreen.style.position = 'fixed';
-    goScreen.style.inset = '0';
-    goScreen.style.background = 'rgba(0,0,0,0.75)';
-    goScreen.style.color = 'white';
-    goScreen.style.fontSize = '32px';
-    goScreen.style.fontWeight = '700';
-    goScreen.style.display = 'flex';
-    goScreen.style.flexDirection = 'column';
-    goScreen.style.justifyContent = 'center';
-    goScreen.style.alignItems = 'center';
-    goScreen.style.zIndex = '400';
-
-    const msg = document.createElement('div');
-    msg.textContent = 'Game Over';
-    goScreen.appendChild(msg);
-
-    restartBtn.textContent = 'Restart';
-    restartBtn.className = 'restartBtn';
-    goScreen.appendChild(restartBtn);
-
-    lobbyBtn.textContent = 'Back to Lobby';
-    lobbyBtn.className = 'lobbyBtn';
-    goScreen.appendChild(lobbyBtn);
-
-    document.body.appendChild(goScreen);
-    return goScreen;
-  }
-
-  // Show game over UI
-  function showGameOver() {
-    if (!highScores[playerName] || score > highScores[playerName]) {
-      highScores[playerName] = score;
-      coins += Math.floor(score / 10); // Earn coins from score
-      saveData();
-    }
-    updateUI();
-    gameOverScreen.style.display = 'flex';
-  }
-
-  // Restart game from game over screen
-  restartBtn.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none';
-    startGame();
-  });
-
-  // Back to lobby from game over screen
-  lobbyBtn.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none';
-    jumpBtn.style.display = 'none';
-    slideBtn.style.display = 'none';
-    lobby.style.display = 'flex';
-    playerNameInput.style.display = 'block';
-    playBtn.style.display = 'block';
-    score = 0;
-    updateUI();
-    saveData();
-  });
-
-  // Jump action
-  function jump() {
-    if (isJumping || isSliding) return;
-    isJumping = true;
-    if (isSfxOn) sfxJump.play();
-    let jumpStartTime = performance.now();
-    const jumpUpDuration = jumpDuration / 2;
-    const jumpDownDuration = jumpDuration / 2;
-
-    function animateJump(time) {
-      let elapsed = time - jumpStartTime;
-      if (elapsed < jumpUpDuration) {
-        // Going up
-        let height = (elapsed / jumpUpDuration) * jumpHeight;
-        dino.style.bottom = `${12 + height / window.innerHeight * 100}vh`;
-        requestAnimationFrame(animateJump);
-      } else if (elapsed < jumpDuration) {
-        // Going down
-        let height = ((jumpDuration - elapsed) / jumpDownDuration) * jumpHeight;
-        dino.style.bottom = `${12 + height / window.innerHeight * 100}vh`;
-        requestAnimationFrame(animateJump);
-      } else {
-        // Done jumping
-        dino.style.bottom = '12vh';
-        isJumping = false;
-      }
-    }
-    requestAnimationFrame(animateJump);
-  }
-
-  // Slide action
-  function slide() {
-    if (isJumping || isSliding) return;
-    isSliding = true;
-    if (isSfxOn) sfxSlide.play();
-    dino.classList.add('slide');
-    setTimeout(() => {
-      dino.classList.remove('slide');
-      isSliding = false;
-    }, slideDuration);
-  }
-
-  // Spawn obstacles
-  function spawnObstacle() {
-    if (!gameRunning) return;
-    const obstacle = document.createElement('div');
-    obstacle.className = 'obstacle';
-    obstacle.style.left = '100vw';
-    game.appendChild(obstacle);
-    obstacles.push(obstacle);
-  }
-
-  // Clear obstacles
-  function clearObstacles() {
-    obstacles.forEach(obs => {
-      if (obs.parentNode) obs.parentNode.removeChild(obs);
-    });
-    obstacles = [];
-  }
-
-  // Game loop
-  function gameLoop() {
-    if (!gameRunning) return;
-
-    // Move obstacles
-    obstacles.forEach((obs, idx) => {
-      let leftPx = parseFloat(obs.style.left) || window.innerWidth;
-      leftPx -= 5; // Speed: 5px per frame
-      obs.style.left = leftPx + 'px';
-
-      // Remove off-screen obstacles
-      if (leftPx < -obs.offsetWidth) {
-        if (obs.parentNode) obs.parentNode.removeChild(obs);
-        obstacles.splice(idx, 1);
-        score += 1;
-        updateUI();
-      } else {
-        // Collision detection
-        if (checkCollision(dino, obs)) {
-          endGame();
-        }
-      }
-    });
-
-    requestAnimationFrame(gameLoop);
-  }
-
-  // Collision detection helper
-  function checkCollision(a, b) {
-    const aRect = a.getBoundingClientRect();
-    const bRect = b.getBoundingClientRect();
-
-    return !(
-      aRect.top > bRect.bottom ||
-      aRect.bottom < bRect.top ||
-      aRect.right < bRect.left ||
-      aRect.left > bRect.right
-    );
-  }
-
-  // Utility: Random integer between min and max
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  // Button event listeners
-  playBtn.addEventListener('click', () => {
-    playerName = playerNameInput.value.trim();
-    if (!playerName) {
-      alert('Please enter your name.');
-      return;
-    }
-    saveData();
-    startGame();
-  });
-
-  jumpBtn.addEventListener('click', () => jump());
-  slideBtn.addEventListener('click', () => slide());
-
-  // Keyboard controls
-  window.addEventListener('keydown', e => {
-    if (!gameRunning) return;
-    if (e.code === 'Space') {
-      jump();
-      e.preventDefault();
-    } else if (e.code === 'ArrowDown') {
-      slide();
-      e.preventDefault();
-    }
-  });
-
-  // Top menu button handlers
-  btnCharacter.addEventListener('click', () => showModal(characterModal));
-  btnRank.addEventListener('click', () => showModal(rankModal));
-  btnGuide.addEventListener('click', () => showModal(guideModal));
-  btnOption.addEventListener('click', () => showModal(optionModal));
-
-  // Modal close buttons
-  closeCharacterModal.addEventListener('click', () => hideModal(characterModal));
-  closeRankModal.addEventListener('click', () => hideModal(rankModal));
-  closeGuideModal.addEventListener('click', () => hideModal(guideModal));
-  closeOptionModal.addEventListener('click', () => hideModal(optionModal));
-
-  // Initialize
-  loadData();
-
-  // Hide jump/slide buttons initially
-  jumpBtn.style.display = 'none';
-  slideBtn.style.display = 'none';
-
-})();
+  const closeCharacter = document.getElementById('closeCharacter');
+  const closeGuide = document.getElementById('closeGuide');
+  const closeOption = document.getElementById('closeOption');
+  const
