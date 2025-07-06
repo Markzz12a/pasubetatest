@@ -3,18 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame Full</title>
+<title>PasuGame - Dino Run Full</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+  /* Reset */
   * {
     box-sizing: border-box;
   }
-  html, body {
+
+  body, html {
     margin: 0; padding: 0; height: 100%;
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
     background: #335544;
     overflow: hidden;
   }
+
   #game {
     position: relative;
     width: 100vw;
@@ -22,6 +26,7 @@
     background: url("Background.webp") no-repeat center center/cover;
     overflow: hidden;
   }
+
   #ground {
     position: absolute;
     bottom: 0;
@@ -30,6 +35,7 @@
     background: url("ground.jpg") repeat-x bottom/auto 12vh;
     z-index: 10;
   }
+
   #chibiCat {
     position: absolute;
     bottom: 12vh;
@@ -44,6 +50,7 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-0.5vh); }
   }
+
   #coinBar {
     position: fixed;
     top: 10px;
@@ -65,36 +72,34 @@
     width: 32px;
     height: 32px;
   }
+
   #lobby {
     position: absolute;
     inset: 0;
-    background:
-      url("Background.webp") no-repeat center center/cover,
-      rgba(0,0,0,0.5);
-    filter: brightness(0.6);
+    background: url("Background.webp") no-repeat center center/cover;
+    filter: brightness(0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 150;
     padding: 0 20px;
-    color: white;
   }
+
   #lobbyContent {
-    position: relative;
-    z-index: 200;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(51, 68, 68, 0.9), rgba(10, 20, 10, 0.95));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    z-index: 160;
+    padding: 0 20px;
   }
-  #playerNameInput {
-    font-size: 20px;
-    padding: 10px 15px;
-    border-radius: 12px;
-    border: none;
-    margin-bottom: 16px;
-    width: 100%;
-  }
+
   #playBtn {
     background: linear-gradient(145deg, #D97448, #B14B1C);
     border: 3px solid #7A3B24;
@@ -103,19 +108,16 @@
     font-size: 48px;
     color: white;
     font-weight: 700;
-    padding: 18px 0;
+    padding: 18px 100px;
     cursor: pointer;
     user-select: none;
     text-shadow: 1px 1px 2px #511E0A;
-    width: 100%;
     transition: transform 0.15s ease;
+    font-family: 'Comic Neue', cursive, Arial, sans-serif;
   }
-  #playBtn:hover {
-    transform: scale(1.05);
-  }
-  #playBtn:active {
-    transform: scale(0.95);
-  }
+  #playBtn:hover { transform: scale(1.05); }
+  #playBtn:active { transform: scale(0.95); }
+
   #topMenu {
     position: fixed;
     top: 10px;
@@ -124,6 +126,7 @@
     gap: 16px;
     z-index: 200;
   }
+
   .hexBtn {
     --hex-size: 72px;
     width: var(--hex-size);
@@ -143,21 +146,20 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    color: white;
     user-select: none;
   }
-  .hexBtn:hover {
-    background: #D97448;
-  }
+  .hexBtn:hover { background: #D97448; }
   .hexBtn img {
     width: 28px;
     filter: drop-shadow(0 1px 0 #4F2F0C);
   }
   .hexBtn span {
+    color: white;
     font-size: 13px;
     font-weight: 700;
     text-shadow: 0 0 4px #511E0A;
   }
+
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -167,6 +169,7 @@
     justify-content: center;
     z-index: 300;
   }
+
   .modal-panel {
     background: #fef8ef;
     border-radius: 14px;
@@ -177,8 +180,8 @@
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    color: #402E0F;
   }
+
   .closeBtn {
     position: absolute;
     top: 12px;
@@ -190,9 +193,8 @@
     user-select: none;
     line-height: 1;
   }
-  .closeBtn:hover {
-    color: #FF5555;
-  }
+  .closeBtn:hover { color: #FF5555; }
+
   #ownedCharacters {
     display: flex;
     flex-wrap: wrap;
@@ -235,6 +237,7 @@
   .charItem button:hover {
     background: #D97448;
   }
+
   #confirmBuyModal .modal-panel {
     max-width: 380px;
     text-align: center;
@@ -266,6 +269,7 @@
   #confirmNoBtn:hover {
     background: #FF5555;
   }
+
   #guideModal .modal-panel {
     font-size: 16px;
     line-height: 1.5;
@@ -281,17 +285,22 @@
     margin: 14px 0;
     box-shadow: 0 0 8px #B47E29;
   }
+
   #score {
     position: fixed;
-    top: 10px;
-    right: 20px;
+    top: 60px;
+    left: 10px;
     font-weight: 700;
-    font-size: 20px;
+    font-size: 24px;
     color: white;
     text-shadow: 0 0 5px #4C2600;
     user-select: none;
     z-index: 200;
   }
+  #coinBar {
+    z-index: 200;
+  }
+
   #dino {
     position: absolute;
     bottom: 12vh;
@@ -305,6 +314,7 @@
   #dino.slide {
     height: calc(14vw * 0.5) !important;
   }
+
   #jumpBtn, #slideBtn {
     position: fixed;
     bottom: 20px;
@@ -327,6 +337,7 @@
     right: 20px;
     background-image: url("slide.png");
   }
+
   .obstacle {
     position: absolute;
     bottom: 12vh;
@@ -336,6 +347,7 @@
     border-radius: 0.5vw;
     z-index: 15;
   }
+
   .box {
     position: absolute;
     bottom: 20vh;
@@ -346,6 +358,7 @@
     box-shadow: 0 0 8px 2px #FFC800;
     z-index: 15;
   }
+
   #gameOver {
     position: fixed;
     inset: 0;
@@ -379,6 +392,7 @@
     color: white;
     box-shadow: 0 0 8px #7A2424;
   }
+
   #playBtn, .hexBtn, .closeBtn, #confirmYesBtn, #confirmNoBtn, .charItem button, #jumpBtn, #slideBtn {
     pointer-events: auto !important;
     position: relative !important;
@@ -390,69 +404,60 @@
   #lobby > * {
     pointer-events: auto;
   }
-  /* Responsive for mobile */
-  @media (max-width: 600px) {
+
+  @media (max-width: 700px) {
+    #playBtn {
+      padding: 14px 70px;
+      font-size: 36px;
+    }
+    .hexBtn {
+      --hex-size: 60px;
+      height: calc(var(--hex-size) * 1.15);
+    }
     #dino {
-      left: 10vw;
-      width: 20vw;
+      width: 24vw;
     }
     #jumpBtn, #slideBtn {
       width: 70px;
       height: 70px;
       bottom: 15px;
     }
-    #playBtn {
-      font-size: 36px;
-      padding: 14px 0;
-    }
-    #topMenu {
-      top: 5px;
-      right: 10px;
-      gap: 8px;
-    }
-    .hexBtn {
-      --hex-size: 54px;
-      height: calc(var(--hex-size) * 1.15);
-    }
   }
 </style>
 </head>
 <body>
-
 <div id="game">
   <div id="ground"></div>
   <div id="chibiCat" title="Your cute cat character"></div>
 
-  <div id="coinBar" title="Fish Coins">
+  <div id="coinBar" title="Fish Coins" style="display:flex;">
     <img src="coin.png" alt="Coin Icon" />
     <span id="coinCount">0</span>
   </div>
 
-  <div id="score" title="Score" style="display:none;">Score: 0</div>
+  <div id="score" title="Score">Score: 0</div>
 
   <div id="dino"></div>
 
-  <!-- Lobby -->
-  <div id="lobby" aria-label="Lobby screen">
+  <div id="lobby" aria-label="Game Lobby" role="main">
     <div id="lobbyContent">
-      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Player name input" />
-      <button id="playBtn" title="Start Game">Play</button>
+      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Enter your player name" />
+      <button id="playBtn" title="Start Game" aria-label="Start Game Button">Play</button>
     </div>
-
-    <div id="topMenu" role="menu" aria-label="Top menu">
-      <button class="hexBtn" id="btnCharacter" title="Characters" role="menuitem">
+    <div id="topMenu" role="navigation" aria-label="Top Menu">
+      <button class="hexBtn" id="btnCharacter" title="Characters" aria-label="Characters Button">
         <img src="modelIcon.png" alt="Character Icon" />
         <span>Character</span>
       </button>
-      <button class="hexBtn" id="btnRank" title="Leaderboard" role="menuitem">
-        <img src="rankIcon.png" alt="Rank Icon" />
+      <button class="hexBtn" id="btnRank" title="Leaderboard" aria-label="Leaderboard Button">
+        <img src="rankIcon.png" alt="Leaderboard Icon" />
         <span>Rank</span>
       </button>
-      <button class="hexBtn" id="btnGuide" title="Guide" role="menuitem">
+      <button class="hexBtn" id="btnGuide" title="Guide" aria-label="Guide Button">
         <img src="guideIcon.png" alt="Guide Icon" />
         <span>Guide</span>
       </button>
-      <button class="hexBtn" id="btnOption" title="Options" role="menuitem">
+      <button class="hexBtn" id="btnOption" title="Option" aria-label="Option Button">
         <img src="optionIcon.png" alt="Option Icon" />
         <span>Option</span>
       </button>
@@ -460,28 +465,294 @@
   </div>
 
   <!-- Character Modal -->
-  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="characterTitle" tabindex="-1">
-    <div class="modal-panel" role="document">
-      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
-      <h2 id="characterTitle">Characters</h2>
+  <div class="modal-bg" id="characterModal" role="dialog" aria-modal="true" aria-labelledby="characterModalTitle">
+    <div class="modal-panel">
+      <span class="closeBtn" id="closeCharacterModal" role="button" tabindex="0" aria-label="Close Characters">&times;</span>
+      <h2 id="characterModalTitle">Characters</h2>
       <div id="ownedCharacters"></div>
     </div>
   </div>
 
-  <!-- Confirm Buy Modal -->
-  <div id="confirmBuyModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmBuyTitle" tabindex="-1">
-    <div class="modal-panel" role="document" style="text-align:center;">
-      <span class="closeBtn" id="closeConfirmBuy" role="button" aria-label="Close Buy Confirmation">×</span>
-      <h3 id="confirmBuyTitle">Confirm Purchase</h3>
-      <p id="confirmBuyText"></p>
-      <button class="btnConfirm" id="confirmYesBtn">Yes</button>
-      <button class="btnConfirm" id="confirmNoBtn">No</button>
+  <!-- Leaderboard Modal -->
+  <div class="modal-bg" id="rankModal" role="dialog" aria-modal="true" aria-labelledby="rankModalTitle">
+    <div class="modal-panel">
+      <span class="closeBtn" id="closeRankModal" role="button" tabindex="0" aria-label="Close Leaderboard">&times;</span>
+      <h2 id="rankModalTitle">Leaderboard (Coming soon...)</h2>
+      <p style="text-align:center; font-style: italic;">Feature under development.</p>
     </div>
   </div>
 
   <!-- Guide Modal -->
-  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="guideTitle" tabindex="-1">
-    <div class="modal-panel" role="document">
-      <span class="closeBtn" id="closeGuide" role="button" aria-label="Close Guide Modal">×</span>
-      <h2 id="guideTitle">Game Guide</h2>
-      <p>Welcome to PasuG
+  <div class="modal-bg" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
+    <div class="modal-panel">
+      <span class="closeBtn" id="closeGuideModal" role="button" tabindex="0" aria-label="Close Guide">&times;</span>
+      <h2 id="guideModalTitle">Game Guide</h2>
+      <p>Jump over obstacles by tapping the jump button or pressing the spacebar. Slide to avoid low obstacles.</p>
+      <p>Collect fish coins from boxes to buy new characters in the Character menu.</p>
+      <img src="guide_jump.png" alt="Jump Example" />
+      <img src="guide_slide.png" alt="Slide Example" />
+    </div>
+  </div>
+
+  <!-- Option Modal -->
+  <div class="modal-bg" id="optionModal" role="dialog" aria-modal="true" aria-labelledby="optionModalTitle">
+    <div class="modal-panel">
+      <span class="closeBtn" id="closeOptionModal" role
+
+</div>
+
+  <button id="jumpBtn" title="Jump" aria-label="Jump Button"></button>
+  <button id="slideBtn" title="Slide" aria-label="Slide Button"></button>
+
+  <div id="gameOver" role="alertdialog" aria-labelledby="gameOverText">
+    <div id="gameOverText">Game Over</div>
+    <button class="restartBtn" id="restartBtn">Restart</button>
+    <button class="lobbyBtn" id="toLobbyBtn">Lobby</button>
+  </div>
+
+</div>
+
+<script>
+const playBtn = document.getElementById("playBtn");
+const playerNameInput = document.getElementById("playerNameInput");
+const dino = document.getElementById("dino");
+const scoreDisplay = document.getElementById("score");
+const coinCount = document.getElementById("coinCount");
+const gameOverScreen = document.getElementById("gameOver");
+const restartBtn = document.getElementById("restartBtn");
+const toLobbyBtn = document.getElementById("toLobbyBtn");
+const jumpBtn = document.getElementById("jumpBtn");
+const slideBtn = document.getElementById("slideBtn");
+const lobby = document.getElementById("lobby");
+
+let score = 0;
+let coins = parseInt(localStorage.getItem("pasuCoins")) || 0;
+let isJumping = false;
+let isSliding = false;
+let gameRunning = false;
+let playerName = "";
+
+coinCount.textContent = coins;
+
+// Music/SFX Settings
+let bgmOn = true;
+let sfxOn = true;
+const jumpSound = new Audio("jump.mp3");
+const slideSound = new Audio("slide.mp3");
+const boxSound = new Audio("box.mp3");
+
+// Characters
+const availableCharacters = [
+  { name: "myDino", img: "myDino.png", price: 0 },
+  { name: "peet", img: "peet.png", price: 20 },
+  { name: "broin", img: "broin.png", price: 30 },
+];
+let ownedCharacters = JSON.parse(localStorage.getItem("ownedCharacters")) || ["myDino"];
+let currentCharacter = localStorage.getItem("currentCharacter") || "myDino";
+
+// Modal Controls
+function showModal(id) {
+  document.getElementById(id).style.display = "flex";
+}
+function closeModal(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+document.getElementById("btnCharacter").onclick = () => {
+  showModal("characterModal");
+  renderCharacters();
+};
+document.getElementById("closeCharacterModal").onclick = () => closeModal("characterModal");
+
+document.getElementById("btnRank").onclick = () => showModal("rankModal");
+document.getElementById("closeRankModal").onclick = () => closeModal("rankModal");
+
+document.getElementById("btnGuide").onclick = () => showModal("guideModal");
+document.getElementById("closeGuideModal").onclick = () => closeModal("guideModal");
+
+document.getElementById("btnOption").onclick = () => showModal("optionModal");
+document.getElementById("closeOptionModal").onclick = () => closeModal("optionModal");
+
+function renderCharacters() {
+  const container = document.getElementById("ownedCharacters");
+  container.innerHTML = "";
+  availableCharacters.forEach(char => {
+    const div = document.createElement("div");
+    div.className = "charItem";
+    div.innerHTML = `
+      <img src="${char.img}" alt="${char.name}" />
+      <button>${ownedCharacters.includes(char.name)
+        ? currentCharacter === char.name ? "Using" : "Use"
+        : `Buy (${char.price})`
+      }</button>
+    `;
+    const btn = div.querySelector("button");
+    btn.onclick = () => {
+      if (ownedCharacters.includes(char.name)) {
+        currentCharacter = char.name;
+        localStorage.setItem("currentCharacter", currentCharacter);
+        dino.style.backgroundImage = `url('${char.img}')`;
+        renderCharacters();
+      } else {
+        confirmBuy(char);
+      }
+    };
+    container.appendChild(div);
+  });
+}
+
+function confirmBuy(char) {
+  const confirm = window.confirm(`Do you want to buy ${char.name} for ${char.price} coins?`);
+  if (confirm && coins >= char.price) {
+    coins -= char.price;
+    ownedCharacters.push(char.name);
+    localStorage.setItem("ownedCharacters", JSON.stringify(ownedCharacters));
+    localStorage.setItem("pasuCoins", coins);
+    coinCount.textContent = coins;
+    renderCharacters();
+  }
+}
+</script>
+
+    <script>
+// เริ่มเกม
+playBtn.onclick = () => {
+  const name = playerNameInput.value.trim();
+  if (!name) return alert("Please enter your name");
+  playerName = name;
+  lobby.style.display = "none";
+  score = 0;
+  scoreDisplay.textContent = "Score: 0";
+  dino.style.backgroundImage = `url('${getCharacterImage(currentCharacter)}')`;
+  jumpBtn.style.display = slideBtn.style.display = "block";
+  gameRunning = true;
+  spawnLoop();
+  gameLoop();
+};
+
+restartBtn.onclick = () => location.reload();
+toLobbyBtn.onclick = () => location.reload();
+
+function getCharacterImage(name) {
+  const char = availableCharacters.find(c => c.name === name);
+  return char ? char.img : "myDino.png";
+}
+
+// Jump
+function jump() {
+  if (isJumping || !gameRunning) return;
+  isJumping = true;
+  if (sfxOn) jumpSound.play();
+  let jumpHeight = 0;
+  const maxHeight = 180;
+  const upInterval = setInterval(() => {
+    if (jumpHeight >= maxHeight) {
+      clearInterval(upInterval);
+      const downInterval = setInterval(() => {
+        if (jumpHeight <= 0) {
+          clearInterval(downInterval);
+          isJumping = false;
+        } else {
+          jumpHeight -= 8;
+          dino.style.bottom = (12 * window.innerHeight / 100 + jumpHeight) + "px";
+        }
+      }, 20);
+    } else {
+      jumpHeight += 8;
+      dino.style.bottom = (12 * window.innerHeight / 100 + jumpHeight) + "px";
+    }
+  }, 20);
+}
+
+// Slide
+function slide() {
+  if (isSliding || !gameRunning) return;
+  isSliding = true;
+  if (sfxOn) slideSound.play();
+  dino.classList.add("slide");
+  setTimeout(() => {
+    dino.classList.remove("slide");
+    isSliding = false;
+  }, 1000);
+}
+
+jumpBtn.onclick = jump;
+slideBtn.onclick = slide;
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") jump();
+  else if (e.code === "ArrowDown") slide();
+});
+
+// Obstacle + box spawn
+function spawnLoop() {
+  if (!gameRunning) return;
+  const delay = Math.random() * 1500 + 2000;
+  setTimeout(() => {
+    const isBox = Math.random() < 0.3;
+    const el = document.createElement("div");
+    el.className = isBox ? "box" : "obstacle";
+    el.style.left = "100vw";
+    el.style.bottom = isBox ? "20vh" : "12vh";
+    document.getElementById("game").appendChild(el);
+
+    const move = setInterval(() => {
+      if (!gameRunning) {
+        el.remove();
+        clearInterval(move);
+        return;
+      }
+      const left = parseFloat(el.style.left);
+      el.style.left = (left - 6) + "px";
+
+      const dinoRect = dino.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+
+      if (
+        dinoRect.left < elRect.right &&
+        dinoRect.right > elRect.left &&
+        dinoRect.bottom > elRect.top &&
+        dinoRect.top < elRect.bottom
+      ) {
+        if (el.classList.contains("box")) {
+          if (sfxOn) boxSound.play();
+          coins += 1;
+          localStorage.setItem("pasuCoins", coins);
+          coinCount.textContent = coins;
+          el.remove();
+          clearInterval(move);
+        } else {
+          gameOver();
+          clearInterval(move);
+        }
+      }
+
+      if (left < -50) {
+        el.remove();
+        clearInterval(move);
+      }
+    }, 16);
+
+    spawnLoop();
+  }, delay);
+}
+
+// Game loop
+function gameLoop() {
+  if (!gameRunning) return;
+  score++;
+  scoreDisplay.textContent = "Score: " + score;
+  setTimeout(gameLoop, 200);
+}
+
+// Game over
+function gameOver() {
+  gameRunning = false;
+  gameOverScreen.style.display = "flex";
+  const best = parseInt(localStorage.getItem("best_" + playerName)) || 0;
+  if (score > best) {
+    localStorage.setItem("best_" + playerName, score);
+  }
+}
+</script>
+</body>
+  </html>
