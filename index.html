@@ -3,332 +3,229 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame 3 Characters Playable</title>
+<title>Simple PasuGame Playable</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
-  *{box-sizing:border-box;}
-  body,html {
-    margin:0; padding:0; height:100%;
-    font-family:'Comic Neue', cursive, Arial, sans-serif;
-    background:#335544;
-    overflow:hidden;
+  body, html {
+    margin:0; padding:0; overflow:hidden;
+    font-family: Arial, sans-serif;
+    background: #335544;
   }
   #game {
     position: relative;
     width: 100vw; height: 100vh;
-    background: url("Background.webp") no-repeat center center/cover;
+    background: url('Background.webp') no-repeat center/cover;
   }
   #ground {
     position: absolute; bottom:0;
-    width:100%; height:12vh;
-    background: url("ground.jpg") repeat-x bottom/auto 12vh;
-    z-index:10;
-  }
-  #chibiCat {
-    position: absolute; bottom:12vh; left:3vw;
-    width:10vw; aspect-ratio:1/1;
-    background: url("catWhite.png") no-repeat center/contain;
-    animation: catBreathe 3s ease-in-out infinite;
-    z-index:20;
-  }
-  @keyframes catBreathe {
-    0%,100% {transform: translateY(0);}
-    50% {transform: translateY(-0.5vh);}
-  }
-  #coinBar {
-    position: fixed; top:10px; left:10px;
-    background: linear-gradient(45deg, #8B3E2F, #D97348);
-    border: 4px solid #7A3B24;
-    border-radius: 12px;
-    padding:6px 16px;
-    display:flex; align-items:center; gap:10px;
-    color:white;
-    font-weight:700;
-    font-size:20px;
-    user-select:none;
-    z-index:1000;
-    box-shadow: 0 0 6px #FFC800;
-  }
-  #coinBar img {width:32px; height:32px;}
-  #score {
-    position: fixed; top:10px; right:20px;
-    font-weight:700;
-    font-size:20px;
-    color:white;
-    text-shadow:0 0 5px #4C2600;
-    user-select:none;
-    z-index:1000;
-  }
-  #lobby {
-    position: absolute;
-    inset:0;
-    background: linear-gradient(to bottom, rgba(51, 68, 68, 0.85), rgba(10, 20, 10, 0.9)), url("Background.webp") no-repeat center center/cover;
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 0 20px;
-  }
-  #playBtn {
-    margin-top: 15vh;
-    background: linear-gradient(145deg, #D97448, #B14B1C);
-    border: 3px solid #7A3B24;
-    border-radius: 24px;
-    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3), 0 5px 8px #572B0D;
-    font-size: 48px;
-    color: white;
-    font-weight: 700;
-    padding: 18px 100px;
-    cursor: pointer;
-    user-select: none;
-    text-shadow: 1px 1px 2px #511E0A;
-    transition: transform 0.15s ease;
-  }
-  #playBtn:hover { transform: scale(1.05); }
-  #playBtn:active { transform: scale(0.95); }
-  #topMenu {
-    position: fixed;
-    top: 10px; right: 20px;
-    display: flex; gap: 16px;
-    z-index: 1001;
-  }
-  .hexBtn {
-    --hex-size: 72px;
-    width: var(--hex-size);
-    height: calc(var(--hex-size) * 1.15);
-    background: #C16E33;
-    border: 3px solid #7A3B24;
-    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
-    user-select: none;
-  }
-  .hexBtn:hover { background: #D97448; }
-  .hexBtn img {
-    width: 28px;
-    filter: drop-shadow(0 1px 0 #4F2F0C);
-  }
-  .hexBtn span {
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    text-shadow: 0 0 4px #511E0A;
-  }
-  .modal-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1500;
-  }
-  .modal-panel {
-    background: #fef8ef;
-    border-radius: 14px;
-    box-shadow: 0 0 15px #4f360b;
-    padding: 24px 28px;
-    max-width: 460px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .closeBtn {
-    position: absolute;
-    top: 12px; right: 14px;
-    font-weight: 900;
-    font-size: 28px;
-    color: #B33A3A;
-    cursor: pointer;
-    user-select: none;
-    line-height: 1;
-  }
-  .closeBtn:hover { color: #FF5555; }
-  #ownedCharacters {
-    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px;
-  }
-  .charItem {
-    width: 110px;
-    background: linear-gradient(145deg, #fef7e3, #f9f3dc);
-    border: 2px solid #B47E29;
-    border-radius: 16px;
-    box-shadow: inset 0 3px 6px #f9f6d7;
-    padding: 10px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .charItem img {
-    width: 80px; height: 80px;
-    object-fit: contain;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  }
-  .charItem button {
-    margin-top: 8px;
-    width: 80%;
-    background: #C16E33;
-    border: none;
-    border-radius: 14px;
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 8px 0;
-    cursor: pointer;
-    text-shadow: 0 0 2px #512F07;
-    transition: background 0.2s ease;
-  }
-  .charItem button:hover { background: #D97448; }
-  #score {
-    position: fixed;
-    top: 10px;
-    right: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    color: white;
-    text-shadow: 0 0 5px #4C2600;
-    user-select: none;
-    z-index: 1000;
+    width: 100%; height: 12vh;
+    background: url('ground.jpg') repeat-x bottom/contain;
+    z-index: 10;
   }
   #dino {
     position: absolute;
     bottom: 12vh;
     left: 12vw;
     width: 14vw;
-    aspect-ratio: 391 / 322;
+    height: auto;
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: contain;
-    transition: bottom 0.2s ease, height 0.3s ease;
-    z-index: 25;
+    transition: bottom 0.15s;
+    z-index: 20;
   }
-  #dino.slide {
-    height: calc(14vw * 0.5) !important;
+  #coinBar {
+    position: fixed; top: 10px; left: 10px;
+    background: #D97448;
+    padding: 6px 12px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    display: flex; align-items:center; gap: 6px;
+  }
+  #coinBar img {
+    width: 24px; height: 24px;
+  }
+  #score {
+    position: fixed; top: 10px; right: 10px;
+    color: white; font-weight: bold;
+    font-size: 18px;
+    z-index: 1000;
+  }
+  #lobby {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    color: white;
+  }
+  #playBtn {
+    padding: 20px 60px;
+    font-size: 48px;
+    background: #D97448;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  #characterSelect {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+  }
+  .charBtn {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #fff;
+    border-radius: 12px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    transition: border-color 0.3s;
+  }
+  .charBtn.selected {
+    border-color: yellow;
   }
   #jumpBtn, #slideBtn {
     position: fixed;
     bottom: 20px;
-    width: 90px; height: 90px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: none;
+    width: 80px; height: 80px;
     border-radius: 50%;
+    border: none;
+    background-color: #D97448;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
-    z-index: 220;
-    display: none;
-    user-select: none;
+    z-index: 1000;
   }
   #jumpBtn {
     right: 110px;
-    background-image: url("jump.png");
   }
   #slideBtn {
     right: 20px;
-    background-image: url("slide.png");
-  }
-  .obstacle {
-    position: absolute;
-    bottom: 12vh;
-    width: 4vw;
-    height: 8vw;
-    background: sienna;
-    border-radius: 0.5vw;
-    z-index: 15;
-  }
-  .box {
-    position: absolute;
-    bottom: 20vh;
-    width: 4vw;
-    height: 4vw;
-    background: gold;
-    border-radius: 50%;
-    box-shadow: 0 0 8px 2px #FFC800;
-    z-index: 15;
-  }
-  #gameOver {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 32px;
-    font-weight: 700;
-    z-index: 500;
-  }
-  #gameOver button {
-    margin: 12px;
-    padding: 14px 48px;
-    font-size: 20px;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    font-family: 'Comic Neue', cursive, Arial, sans-serif;
-    font-weight: 700;
-  }
-  #gameOver .restartBtn {
-    background: #3A8E3A;
-    color: white;
-    box-shadow: 0 0 8px #2F6F2F;
-  }
-  #gameOver .lobbyBtn {
-    background: #B33A3A;
-    color: white;
-    box-shadow: 0 0 8px #7A2424;
   }
 </style>
 </head>
 <body>
 <div id="game">
   <div id="ground"></div>
-  <div id="chibiCat" title="Your cute cat character"></div>
-  <div id="coinBar" title="Fish Coins"><img src="coin.png" alt="Coin Icon" /><span id="coinCount">0</span></div>
-  <div id="score" title="Score" style="display:none;">Score: 0</div>
+  <div id="coinBar"><img src="coin.png" alt="Coin" /> <span id="coinCount">0</span></div>
+  <div id="score">Score: 0</div>
   <div id="dino"></div>
 
   <div id="lobby">
-    <button id="playBtn" title="Start Game">Play</button>
-    <div id="topMenu">
-      <button class="hexBtn" id="btnCharacter" title="Characters">
-        <img src="modelIcon.png" alt="Character Icon" />
-        <span>Character</span>
-      </button>
-      <button class="hexBtn" id="btnRank" title="Leaderboard">
-        <img src="rankIcon.png" alt="Rank Icon" />
-        <span>Rank</span>
-      </button>
-      <button class="hexBtn" id="btnGuide" title="Guide">
-        <img src="guideIcon.png" alt="Guide Icon" />
-        <span>Guide</span>
-      </button>
-      <button class="hexBtn" id="btnOption" title="Options">
-        <img src="optionIcon.png" alt="Option Icon" />
-        <span>Option</span>
-      </button>
+    <button id="playBtn">Play</button>
+    <div id="characterSelect">
+      <div class="charBtn" data-name="myDino.png" style="background-image:url('myDino.png')" title="Default Dino"></div>
+      <div class="charBtn" data-name="peet.png" style="background-image:url('peet.png')" title="Peet"></div>
+      <div class="charBtn" data-name="broin.png" style="background-image:url('broin.png')" title="Broin"></div>
     </div>
   </div>
 
-  <!-- Character Modal -->
-  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="characterTitle" tabindex="0">
-      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
-      <h2 id="characterTitle">Characters</h2>
-      <div id="ownedCharacters"></div>
-    </div>
-  </div>
+  <button id="jumpBtn" style="display:none;">Jump</button>
+  <button id="slideBtn" style="display:none;">Slide</button>
+</div>
 
-  <!-- Guide Modal -->
-  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="guideTitle" tabindex="0">
-      <
+<script>
+  // ตัวแปร
+  const lobby = document.getElementById('lobby');
+  const playBtn = document.getElementById('playBtn');
+  const dino = document.getElementById('dino');
+  const coinCountEl = document.getElementById('coinCount');
+  const scoreEl = document.getElementById('score');
+  const jumpBtn = document.getElementById('jumpBtn');
+  const slideBtn = document.getElementById('slideBtn');
+  const charBtns = document.querySelectorAll('.charBtn');
 
+  let currentCharacter = 'myDino.png';
+  let coins = 0;
+  let score = 0;
+  let gameRunning = false;
+  let isJumping = false;
+  let jumpTimeout;
+  let slideTimeout;
+
+  // โหลดเสียง
+  const jumpSound = new Audio('jump.mp3');
+  const slideSound = new Audio('slide.mp3');
+  const coinSound = new Audio('box.mp3');
+
+  // เลือกตัวละคร
+  charBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      charBtns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      currentCharacter = btn.getAttribute('data-name');
+      dino.style.backgroundImage = `url(${currentCharacter})`;
+    });
+  });
+  // กำหนด default selected
+  charBtns[0].classList.add('selected');
+  dino.style.backgroundImage = `url(${currentCharacter})`;
+
+  // เล่นเกม
+  playBtn.onclick = () => {
+    lobby.style.display = 'none';
+    jumpBtn.style.display = 'block';
+    slideBtn.style.display = 'block';
+    score = 0;
+    coins = 0;
+    coinCountEl.textContent = coins;
+    scoreEl.textContent = 'Score: 0';
+    gameRunning = true;
+    dino.style.bottom = '12vh';
+    runGame();
+  };
+
+  // กระโดด
+  function jump() {
+    if (isJumping) return;
+    isJumping = true;
+    jumpSound.play();
+    dino.style.bottom = '25vh';
+    setTimeout(() => {
+      dino.style.bottom = '12vh';
+      isJumping = false;
+    }, 400);
+  }
+
+  // สไลด์
+  function slide() {
+    if (isJumping) return; // ไม่สไลด์ขณะกระโดด
+    slideSound.play();
+    dino.classList.add('slide');
+    setTimeout(() => dino.classList.remove('slide'), 600);
+  }
+
+  // ปุ่มมือถือ
+  jumpBtn.onclick = jump;
+  slideBtn.onclick = slide;
+
+  // กดปุ่ม space = jump, ArrowDown = slide
+  window.addEventListener('keydown', e => {
+    if (!gameRunning) return;
+    if(e.code === 'Space') jump();
+    if(e.code === 'ArrowDown') slide();
+  });
+
+  // ฟังก์ชันเล่นเกมแบบง่าย (เพิ่มคะแนนเรื่อยๆ)
+  function runGame() {
+    if (!gameRunning) return;
+    score++;
+    scoreEl.textContent = 'Score: ' + score;
+    // เก็บเหรียญง่ายๆ ทุก 100 คะแนน
+    if(score % 100 === 0) {
+      coins++;
+      coinCountEl.textContent = coins;
+      coinSound.play();
+    }
+    setTimeout(runGame, 100);
+  }
+</script>
+</body>
+</html>
