@@ -17,6 +17,7 @@
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
     background: #335544;
     overflow: hidden;
+    user-select: none;
   }
 
   #game {
@@ -441,7 +442,7 @@
 
   <div id="lobby" aria-label="Game Lobby" role="main">
     <div id="lobbyContent">
-      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Enter your player name" />
+      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Enter your player name" autocomplete="off" />
       <button id="playBtn" title="Start Game" aria-label="Start Game Button">Play</button>
     </div>
     <div id="topMenu" role="navigation" aria-label="Top Menu">
@@ -497,262 +498,643 @@
   <!-- Option Modal -->
   <div class="modal-bg" id="optionModal" role="dialog" aria-modal="true" aria-labelledby="optionModalTitle">
     <div class="modal-panel">
-      <span class="closeBtn" id="closeOptionModal" role
-
-</div>
-
-  <button id="jumpBtn" title="Jump" aria-label="Jump Button"></button>
-  <button id="slideBtn" title="Slide" aria-label="Slide Button"></button>
-
-  <div id="gameOver" role="alertdialog" aria-labelledby="gameOverText">
-    <div id="gameOverText">Game Over</div>
-    <button class="restartBtn" id="restartBtn">Restart</button>
-    <button class="lobbyBtn" id="toLobbyBtn">Lobby</button>
+      <span class="closeBtn" id="closeOptionModal" role="button" tabindex="0" aria-label="Close Options">&times;</span>
+      <h2 id="optionModalTitle">Options</h2>
+      <label><input type="checkbox" id="toggleBGM" checked /> Background Music</label><br />
+      <label><input type="checkbox" id="toggleSFX" checked /> Sound Effects</label>
+    </div>
   </div>
 
+  <!-- Confirm Buy Modal -->
+  <div class="modal-bg" id="confirmBuyModal" role="dialog" aria-modal="true" aria-labelledby="confirmBuyModalTitle">
+    <div class
+      <!-- (ต่อจาก Part 1) -->
+<div class="modal-panel" id="confirmBuyModal" role="dialog" aria-modal="true" aria-labelledby="confirmBuyModalTitle">
+  <span class="closeBtn" id="closeConfirmBuyModal" role="button" tabindex="0" aria-label="Close Confirm Buy">&times;</span>
+  <h3 id="confirmBuyModalTitle">Confirm Purchase</h3>
+  <p id="confirmBuyText"></p>
+  <button class="btnConfirm" id="confirmYesBtn">Yes</button>
+  <button class="btnConfirm" id="confirmNoBtn">No</button>
+</div>
 </div>
 
+<!-- Game Over Screen -->
+<div id="gameOver" role="alertdialog" aria-modal="true" aria-labelledby="gameOverTitle">
+  <div>
+    <h1 id="gameOverTitle">Game Over</h1>
+    <p id="finalScoreText">Score: 0</p>
+    <button class="restartBtn" id="restartBtn">Restart</button>
+    <button class="lobbyBtn" id="goLobbyBtn">Back to Lobby</button>
+  </div>
+</div>
+
+<!-- Jump and Slide Buttons for Mobile -->
+<button id="jumpBtn" aria-label="Jump Button" title="Jump"></button>
+<button id="slideBtn" aria-label="Slide Button" title="Slide"></button>
+
+</div> <!-- end #game -->
+
 <script>
-const playBtn = document.getElementById("playBtn");
-const playerNameInput = document.getElementById("playerNameInput");
-const dino = document.getElementById("dino");
-const scoreDisplay = document.getElementById("score");
-const coinCount = document.getElementById("coinCount");
-const gameOverScreen = document.getElementById("gameOver");
-const restartBtn = document.getElementById("restartBtn");
-const toLobbyBtn = document.getElementById("toLobbyBtn");
-const jumpBtn = document.getElementById("jumpBtn");
-const slideBtn = document.getElementById("slideBtn");
-const lobby = document.getElementById("lobby");
+(() => {
+  // === Constants and Globals ===
+  const game = document.getElementById('game');
+  const dino = document.getElementById('dino');
+  const ground = document.getElementById('ground');
+  const chibiCat = document.getElementById('chibiCat');
+  const coinCountEl = document.getElementById('coinCount');
+  const scoreEl = document.getElementById('score');
+  const lobby = document.getElementById('lobby');
+  const playerNameInput = document.getElementById('playerNameInput');
+  const playBtn = document.getElementById('playBtn');
+  const jumpBtn = document.getElementById('jumpBtn');
+  const slideBtn = document.getElementById('slideBtn');
+  const gameOverScreen = document.getElementById('gameOver');
+  const finalScoreText = document.getElementById('finalScoreText');
+  const restartBtn = document.getElementById('restartBtn');
+  const goLobbyBtn = document.getElementById('goLobbyBtn');
 
-let score = 0;
-let coins = parseInt(localStorage.getItem("pasuCoins")) || 0;
-let isJumping = false;
-let isSliding = false;
-let gameRunning = false;
-let playerName = "";
+  // Modals and buttons
+  const btnCharacter = document.getElementById('btnCharacter');
+  const btnRank = document.getElementById('btnRank');
+  const btnGuide = document.getElementById('btnGuide');
+  const btnOption = document.getElementById('btnOption');
 
-coinCount.textContent = coins;
+  const characterModal = document.getElementById('characterModal');
+  const closeCharacterModal = document.getElementById('closeCharacterModal');
 
-// Music/SFX Settings
-let bgmOn = true;
-let sfxOn = true;
-const jumpSound = new Audio("jump.mp3");
-const slideSound = new Audio("slide.mp3");
-const boxSound = new Audio("box.mp3");
+  const rankModal = document.getElementById('rankModal');
+  const closeRankModal = document.getElementById('closeRankModal');
 
-// Characters
-const availableCharacters = [
-  { name: "myDino", img: "myDino.png", price: 0 },
-  { name: "peet", img: "peet.png", price: 20 },
-  { name: "broin", img: "broin.png", price: 30 },
-];
-let ownedCharacters = JSON.parse(localStorage.getItem("ownedCharacters")) || ["myDino"];
-let currentCharacter = localStorage.getItem("currentCharacter") || "myDino";
+  const guideModal = document.getElementById('guideModal');
+  const closeGuideModal = document.getElementById('closeGuideModal');
 
-// Modal Controls
-function showModal(id) {
-  document.getElementById(id).style.display = "flex";
-}
-function closeModal(id) {
-  document.getElementById(id).style.display = "none";
-}
+  const optionModal = document.getElementById('optionModal');
+  const closeOptionModal = document.getElementById('closeOptionModal');
 
-document.getElementById("btnCharacter").onclick = () => {
-  showModal("characterModal");
-  renderCharacters();
-};
-document.getElementById("closeCharacterModal").onclick = () => closeModal("characterModal");
+  const confirmBuyModal = document.getElementById('confirmBuyModal');
+  const closeConfirmBuyModal = document.getElementById('closeConfirmBuyModal');
+  const confirmBuyText = document.getElementById('confirmBuyText');
+  const confirmYesBtn = document.getElementById('confirmYesBtn');
+  const confirmNoBtn = document.getElementById('confirmNoBtn');
 
-document.getElementById("btnRank").onclick = () => showModal("rankModal");
-document.getElementById("closeRankModal").onclick = () => closeModal("rankModal");
+  const ownedCharactersContainer = document.getElementById('ownedCharacters');
 
-document.getElementById("btnGuide").onclick = () => showModal("guideModal");
-document.getElementById("closeGuideModal").onclick = () => closeModal("guideModal");
+  // Sound effects
+  const sfxJump = new Audio('jump.mp3');
+  const sfxSlide = new Audio('slide.mp3');
+  const sfxCoin = new Audio('box.mp3');
+  const bgm = new Audio('bgm.mp3');
+  bgm.loop = true;
+  bgm.volume = 0.3;
 
-document.getElementById("btnOption").onclick = () => showModal("optionModal");
-document.getElementById("closeOptionModal").onclick = () => closeModal("optionModal");
+  // Game state variables
+  let coins = 0;
+  let score = 0;
+  let gameSpeed = 5; // pixels per frame base speed
+  let obstacleTimer = 0;
+  let obstacleInterval = 1500; // ms between obstacle spawns
+  let boxTimer = 0;
+  let boxInterval = 5000;
+  let obstacles = [];
+  let boxes = [];
+  let jumping = false;
+  let sliding = false;
+  let jumpVelocity = 0;
+  let gravity = 0.8;
+  let jumpPower = 18;
+  let isGameRunning = false;
+  let animationFrameId = null;
+  let playerName = '';
+  let ownedCharacters = {};
+  let selectedCharacter = 'myDino.png'; // default
 
-function renderCharacters() {
-  const container = document.getElementById("ownedCharacters");
-  container.innerHTML = "";
-  availableCharacters.forEach(char => {
-    const div = document.createElement("div");
-    div.className = "charItem";
-    div.innerHTML = `
-      <img src="${char.img}" alt="${char.name}" />
-      <button>${ownedCharacters.includes(char.name)
-        ? currentCharacter === char.name ? "Using" : "Use"
-        : `Buy (${char.price})`
-      }</button>
-    `;
-    const btn = div.querySelector("button");
-    btn.onclick = () => {
-      if (ownedCharacters.includes(char.name)) {
-        currentCharacter = char.name;
-        localStorage.setItem("currentCharacter", currentCharacter);
-        dino.style.backgroundImage = `url('${char.img}')`;
-        renderCharacters();
-      } else {
-        confirmBuy(char);
-      }
-    };
-    container.appendChild(div);
-  });
-}
+  // Settings
+  let bgmEnabled = true;
+  let sfxEnabled = true;
 
-function confirmBuy(char) {
-  const confirm = window.confirm(`Do you want to buy ${char.name} for ${char.price} coins?`);
-  if (confirm && coins >= char.price) {
-    coins -= char.price;
-    ownedCharacters.push(char.name);
-    localStorage.setItem("ownedCharacters", JSON.stringify(ownedCharacters));
-    localStorage.setItem("pasuCoins", coins);
-    coinCount.textContent = coins;
-    renderCharacters();
+  // Local Storage Keys
+  const LS_PLAYERNAME = 'PasuGame_PlayerName';
+  const LS_COINS = 'PasuGame_Coins';
+  const LS_OWNED_CHARS = 'PasuGame_OwnedCharacters';
+  const LS_SELECTED_CHAR = 'PasuGame_SelectedCharacter';
+  const LS_HIGH_SCORE = 'PasuGame_HighScore';
+  const LS_BGM = 'PasuGame_BGM';
+  const LS_SFX = 'PasuGame_SFX';
+
+  // === Utility Functions ===
+  function saveToStorage() {
+    localStorage.setItem(LS_PLAYERNAME, playerName);
+    localStorage.setItem(LS_COINS, coins);
+    localStorage.setItem(LS_OWNED_CHARS, JSON.stringify(ownedCharacters));
+    localStorage.setItem(LS_SELECTED_CHAR, selectedCharacter);
+    localStorage.setItem(LS_HIGH_SCORE, Math.max(score, getHighScore()));
+    localStorage.setItem(LS_BGM, bgmEnabled ? '1' : '0');
+    localStorage.setItem(LS_SFX, sfxEnabled ? '1' : '0');
   }
-}
-</script>
-
-    <script>
-// เริ่มเกม
-playBtn.onclick = () => {
-  const name = playerNameInput.value.trim();
-  if (!name) return alert("Please enter your name");
-  playerName = name;
-  lobby.style.display = "none";
-  score = 0;
-  scoreDisplay.textContent = "Score: 0";
-  dino.style.backgroundImage = `url('${getCharacterImage(currentCharacter)}')`;
-  jumpBtn.style.display = slideBtn.style.display = "block";
-  gameRunning = true;
-  spawnLoop();
-  gameLoop();
-};
-
-restartBtn.onclick = () => location.reload();
-toLobbyBtn.onclick = () => location.reload();
-
-function getCharacterImage(name) {
-  const char = availableCharacters.find(c => c.name === name);
-  return char ? char.img : "myDino.png";
-}
-
-// Jump
-function jump() {
-  if (isJumping || !gameRunning) return;
-  isJumping = true;
-  if (sfxOn) jumpSound.play();
-  let jumpHeight = 0;
-  const maxHeight = 180;
-  const upInterval = setInterval(() => {
-    if (jumpHeight >= maxHeight) {
-      clearInterval(upInterval);
-      const downInterval = setInterval(() => {
-        if (jumpHeight <= 0) {
-          clearInterval(downInterval);
-          isJumping = false;
-        } else {
-          jumpHeight -= 8;
-          dino.style.bottom = (12 * window.innerHeight / 100 + jumpHeight) + "px";
-        }
-      }, 20);
-    } else {
-      jumpHeight += 8;
-      dino.style.bottom = (12 * window.innerHeight / 100 + jumpHeight) + "px";
+  function loadFromStorage() {
+    playerName = localStorage.getItem(LS_PLAYERNAME) || '';
+    coins = parseInt(localStorage.getItem(LS_COINS)) || 0;
+    ownedCharacters = JSON.parse(localStorage.getItem(LS_OWNED_CHARS) || '{}');
+    selectedCharacter = localStorage.getItem(LS_SELECTED_CHAR) || 'myDino.png';
+    bgmEnabled = localStorage.getItem(LS_BGM) === '0' ? false : true;
+    sfxEnabled = localStorage.getItem(LS_SFX) === '0' ? false : true;
+    if(!ownedCharacters['myDino.png']) {
+      ownedCharacters['myDino.png'] = true; // default character owned
     }
-  }, 20);
-}
+  }
+  function getHighScore() {
+    return parseInt(localStorage.getItem(LS_HIGH_SCORE)) || 0;
+  }
+  function updateCoinDisplay() {
+    coinCountEl.textContent = coins;
+  }
+  function updateScoreDisplay() {
+    scoreEl.textContent = `Score: ${score}`;
+  }
+  function playSound(audio) {
+    if(sfxEnabled) {
+      audio.currentTime = 0;
+      audio.play();
+    }
+  }
 
-// Slide
-function slide() {
-  if (isSliding || !gameRunning) return;
-  isSliding = true;
-  if (sfxOn) slideSound.play();
-  dino.classList.add("slide");
-  setTimeout(() => {
-    dino.classList.remove("slide");
-    isSliding = false;
-  }, 1000);
-}
+  // === Game Functions ===
 
-jumpBtn.onclick = jump;
-slideBtn.onclick = slide;
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") jump();
-  else if (e.code === "ArrowDown") slide();
-});
+  function startGame() {
+    if (!playerName.trim()) {
+      alert('Please enter your name to start!');
+      return;
+    }
+    lobby.style.display = 'none';
+    jumpBtn.style.display = 'block';
+    slideBtn.style.display = 'block';
+    isGameRunning = true;
+    score = 0;
+    obstacleTimer = 0;
+    boxTimer = 0;
+    obstacles.forEach(o => o.remove());
+    obstacles = [];
+    boxes.forEach(b => b.remove());
+    boxes = [];
+    updateScoreDisplay();
+    updateCoinDisplay();
+    dino.style.backgroundImage = `url("${selectedCharacter}")`;
+    dino.style.bottom = '12vh';
+    jumping = false;
+    sliding = false;
+    jumpVelocity = 0;
+    if (bgmEnabled) bgm.play();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
 
-// Obstacle + box spawn
-function spawnLoop() {
-  if (!gameRunning) return;
-  const delay = Math.random() * 1500 + 2000;
-  setTimeout(() => {
-    const isBox = Math.random() < 0.3;
-    const el = document.createElement("div");
-    el.className = isBox ? "box" : "obstacle";
-    el.style.left = "100vw";
-    el.style.bottom = isBox ? "20vh" : "12vh";
-    document.getElementById("game").appendChild(el);
+  function endGame() {
+    isGameRunning = false;
+    if (bgmEnabled) bgm.pause();
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+    finalScoreText.textContent = `Score: ${score}`;
+    gameOverScreen.style.display = 'flex';
+    if(score > getHighScore()) {
+      localStorage.setItem(LS_HIGH_SCORE, score);
+      alert(`New High Score! ${score}`);
+    }
+    saveToStorage();
+  }
 
-    const move = setInterval(() => {
-      if (!gameRunning) {
-        el.remove();
-        clearInterval(move);
-        return;
+  function gameLoop(timestamp) {
+    if (!isGameRunning) return;
+
+    // Move obstacles and boxes to left
+    obstacles.forEach(obs => {
+      let posX = parseFloat(obs.style.left);
+      posX -= gameSpeed;
+      obs.style.left = posX + 'px';
+      if(posX + obs.offsetWidth < 0) {
+        obs.remove();
+        obstacles = obstacles.filter(o => o !== obs);
       }
-      const left = parseFloat(el.style.left);
-      el.style.left = (left - 6) + "px";
+    });
 
-      const dinoRect = dino.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
+    boxes.forEach(box => {
+      let posX = parseFloat(box.style.left);
+      posX -= gameSpeed;
+      box.style.left = posX + 'px';
+      if(posX + box.offsetWidth < 0) {
+        box.remove();
+        boxes = boxes.filter(b => b !== box);
+      }
+    });
 
-      if (
-        dinoRect.left < elRect.right &&
-        dinoRect.right > elRect.left &&
-        dinoRect.bottom > elRect.top &&
-        dinoRect.top < elRect.bottom
-      ) {
-        if (el.classList.contains("box")) {
-          if (sfxOn) boxSound.play();
-          coins += 1;
-          localStorage.setItem("pasuCoins", coins);
-          coinCount.textContent = coins;
-          el.remove();
-          clearInterval(move);
-        } else {
-          gameOver();
-          clearInterval(move);
+    // Spawn obstacles randomly
+    obstacleTimer += 16.67;
+    if(obstacleTimer > obstacleInterval) {
+      obstacleTimer = 0;
+      spawnObstacle();
+    }
+
+    // Spawn boxes randomly
+    boxTimer += 16.67;
+    if(boxTimer > boxInterval) {
+      boxTimer = 0;
+      spawnBox();
+    }
+
+    // Handle jump physics
+    if(jumping) {
+      let bottomPx = parseFloat(dino.style.bottom);
+      jumpVelocity -= gravity;
+      bottomPx += jumpVelocity;
+      if(bottomPx <= 12 * window.innerHeight / 100) {
+        bottomPx = 12 * window.innerHeight / 100;
+        jumping = false;
+        jumpVelocity = 0;
+      }
+      dino.style.bottom = bottomPx + 'px';
+    }
+
+    // Handle slide
+    if(sliding) {
+      dino.classList.add('slide');
+    } else {
+      dino.classList.remove('slide');
+    }
+
+    // Update score
+    score += 1;
+    updateScoreDisplay();
+
+    // Collision detection
+    if(checkCollision()) {
+      endGame();
+      return;
+    }
+
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // Obstacle creation
+  function spawnObstacle() {
+    const obstacle = document.createElement('div');
+    obstacle.classList.add('obstacle');
+    obstacle.style.left = window.innerWidth + 'px';
+    obstacle.style.bottom = '12vh';
+    game.appendChild(obstacle);
+    obstacles.push(obstacle);
+  }// --- Part 3: Full JavaScript Game Logic ---
+
+(() => {
+  const game = document.getElementById('game');
+  const lobby = document.getElementById('lobby');
+  const playBtn = document.getElementById('playBtn');
+  const playerNameInput = document.getElementById('playerNameInput');
+  const coinCountSpan = document.getElementById('coinCount');
+  const scoreDisplay = document.getElementById('score');
+  const dino = document.getElementById('dino');
+  const jumpBtn = document.getElementById('jumpBtn');
+  const slideBtn = document.getElementById('slideBtn');
+
+  const characterModal = document.getElementById('characterModal');
+  const rankModal = document.getElementById('rankModal');
+  const guideModal = document.getElementById('guideModal');
+  const optionModal = document.getElementById('optionModal');
+
+  const btnCharacter = document.getElementById('btnCharacter');
+  const btnRank = document.getElementById('btnRank');
+  const btnGuide = document.getElementById('btnGuide');
+  const btnOption = document.getElementById('btnOption');
+
+  const closeCharacterModal = document.getElementById('closeCharacterModal');
+  const closeRankModal = document.getElementById('closeRankModal');
+  const closeGuideModal = document.getElementById('closeGuideModal');
+  const closeOptionModal = document.getElementById('closeOptionModal');
+
+  const gameOverScreen = document.getElementById('gameOver') || createGameOverScreen();
+  const restartBtn = document.createElement('button');
+  const lobbyBtn = document.createElement('button');
+
+  // Game variables
+  let gameRunning = false;
+  let playerName = '';
+  let score = 0;
+  let highScores = {}; // { playerName: highScore }
+  let coins = 0;
+  let ownedCharacters = ['myDino.png']; // default owned
+  let currentCharacter = 'myDino.png';
+
+  // Jump/slide state
+  let isJumping = false;
+  let isSliding = false;
+  let jumpHeight = 120; // px
+  let jumpDuration = 500; // ms
+  let slideDuration = 600; // ms
+
+  // Obstacle management
+  let obstacles = [];
+  let obstacleInterval = null;
+  const obstacleSpawnMinGap = 1600; // ms
+  const obstacleSpawnMaxGap = 3000; // ms
+
+  // Sound effects
+  const sfxJump = new Audio('jump.mp3');
+  const sfxSlide = new Audio('slide.mp3');
+  const sfxCoin = new Audio('box.mp3');
+
+  // Settings
+  let isBgmOn = true;
+  let isSfxOn = true;
+
+  // Load data from localStorage
+  function loadData() {
+    const storedName = localStorage.getItem('PasuGamePlayerName');
+    if(storedName) playerName = storedName;
+    playerNameInput.value = playerName;
+
+    const storedHighScores = localStorage.getItem('PasuGameHighScores');
+    if(storedHighScores) highScores = JSON.parse(storedHighScores);
+
+    const storedCoins = localStorage.getItem('PasuGameCoins');
+    if(storedCoins) coins = parseInt(storedCoins);
+
+    const storedOwnedChars = localStorage.getItem('PasuGameOwnedChars');
+    if(storedOwnedChars) ownedCharacters = JSON.parse(storedOwnedChars);
+
+    const storedCurrentChar = localStorage.getItem('PasuGameCurrentChar');
+    if(storedCurrentChar) currentCharacter = storedCurrentChar;
+
+    const storedBgm = localStorage.getItem('PasuGameBGM');
+    if(storedBgm) isBgmOn = storedBgm === 'true';
+
+    const storedSfx = localStorage.getItem('PasuGameSFX');
+    if(storedSfx) isSfxOn = storedSfx === 'true';
+
+    updateUI();
+  }
+
+  // Save data to localStorage
+  function saveData() {
+    localStorage.setItem('PasuGamePlayerName', playerName);
+    localStorage.setItem('PasuGameHighScores', JSON.stringify(highScores));
+    localStorage.setItem('PasuGameCoins', coins.toString());
+    localStorage.setItem('PasuGameOwnedChars', JSON.stringify(ownedCharacters));
+    localStorage.setItem('PasuGameCurrentChar', currentCharacter);
+    localStorage.setItem('PasuGameBGM', isBgmOn.toString());
+    localStorage.setItem('PasuGameSFX', isSfxOn.toString());
+  }
+
+  // UI update function
+  function updateUI() {
+    coinCountSpan.textContent = coins.toString();
+    scoreDisplay.textContent = `Score: ${score}`;
+    dino.style.backgroundImage = `url('${currentCharacter}')`;
+  }
+
+  // Show/hide modals
+  function showModal(modal) {
+    modal.style.display = 'flex';
+  }
+  function hideModal(modal) {
+    modal.style.display = 'none';
+  }
+
+  // Start the game
+  function startGame() {
+    if (!playerName.trim()) {
+      alert('Please enter your name first.');
+      return;
+    }
+    playerNameInput.style.display = 'none';
+    playBtn.style.display = 'none';
+    lobby.style.display = 'none';
+    jumpBtn.style.display = 'block';
+    slideBtn.style.display = 'block';
+    score = 0;
+    updateUI();
+    gameRunning = true;
+    clearObstacles();
+    spawnObstacle();
+    obstacleInterval = setInterval(spawnObstacle, getRandomInt(obstacleSpawnMinGap, obstacleSpawnMaxGap));
+    // Start game loop
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Stop the game
+  function endGame() {
+    gameRunning = false;
+    clearInterval(obstacleInterval);
+    showGameOver();
+  }
+
+  // Game over screen creation if missing
+  function createGameOverScreen() {
+    const goScreen = document.createElement('div');
+    goScreen.id = 'gameOver';
+    goScreen.style.display = 'none';
+    goScreen.style.position = 'fixed';
+    goScreen.style.inset = '0';
+    goScreen.style.background = 'rgba(0,0,0,0.75)';
+    goScreen.style.color = 'white';
+    goScreen.style.fontSize = '32px';
+    goScreen.style.fontWeight = '700';
+    goScreen.style.display = 'flex';
+    goScreen.style.flexDirection = 'column';
+    goScreen.style.justifyContent = 'center';
+    goScreen.style.alignItems = 'center';
+    goScreen.style.zIndex = '400';
+
+    const msg = document.createElement('div');
+    msg.textContent = 'Game Over';
+    goScreen.appendChild(msg);
+
+    restartBtn.textContent = 'Restart';
+    restartBtn.className = 'restartBtn';
+    goScreen.appendChild(restartBtn);
+
+    lobbyBtn.textContent = 'Back to Lobby';
+    lobbyBtn.className = 'lobbyBtn';
+    goScreen.appendChild(lobbyBtn);
+
+    document.body.appendChild(goScreen);
+    return goScreen;
+  }
+
+  // Show game over UI
+  function showGameOver() {
+    if (!highScores[playerName] || score > highScores[playerName]) {
+      highScores[playerName] = score;
+      coins += Math.floor(score / 10); // Earn coins from score
+      saveData();
+    }
+    updateUI();
+    gameOverScreen.style.display = 'flex';
+  }
+
+  // Restart game from game over screen
+  restartBtn.addEventListener('click', () => {
+    gameOverScreen.style.display = 'none';
+    startGame();
+  });
+
+  // Back to lobby from game over screen
+  lobbyBtn.addEventListener('click', () => {
+    gameOverScreen.style.display = 'none';
+    jumpBtn.style.display = 'none';
+    slideBtn.style.display = 'none';
+    lobby.style.display = 'flex';
+    playerNameInput.style.display = 'block';
+    playBtn.style.display = 'block';
+    score = 0;
+    updateUI();
+    saveData();
+  });
+
+  // Jump action
+  function jump() {
+    if (isJumping || isSliding) return;
+    isJumping = true;
+    if (isSfxOn) sfxJump.play();
+    let jumpStartTime = performance.now();
+    const jumpUpDuration = jumpDuration / 2;
+    const jumpDownDuration = jumpDuration / 2;
+
+    function animateJump(time) {
+      let elapsed = time - jumpStartTime;
+      if (elapsed < jumpUpDuration) {
+        // Going up
+        let height = (elapsed / jumpUpDuration) * jumpHeight;
+        dino.style.bottom = `${12 + height / window.innerHeight * 100}vh`;
+        requestAnimationFrame(animateJump);
+      } else if (elapsed < jumpDuration) {
+        // Going down
+        let height = ((jumpDuration - elapsed) / jumpDownDuration) * jumpHeight;
+        dino.style.bottom = `${12 + height / window.innerHeight * 100}vh`;
+        requestAnimationFrame(animateJump);
+      } else {
+        // Done jumping
+        dino.style.bottom = '12vh';
+        isJumping = false;
+      }
+    }
+    requestAnimationFrame(animateJump);
+  }
+
+  // Slide action
+  function slide() {
+    if (isJumping || isSliding) return;
+    isSliding = true;
+    if (isSfxOn) sfxSlide.play();
+    dino.classList.add('slide');
+    setTimeout(() => {
+      dino.classList.remove('slide');
+      isSliding = false;
+    }, slideDuration);
+  }
+
+  // Spawn obstacles
+  function spawnObstacle() {
+    if (!gameRunning) return;
+    const obstacle = document.createElement('div');
+    obstacle.className = 'obstacle';
+    obstacle.style.left = '100vw';
+    game.appendChild(obstacle);
+    obstacles.push(obstacle);
+  }
+
+  // Clear obstacles
+  function clearObstacles() {
+    obstacles.forEach(obs => {
+      if (obs.parentNode) obs.parentNode.removeChild(obs);
+    });
+    obstacles = [];
+  }
+
+  // Game loop
+  function gameLoop() {
+    if (!gameRunning) return;
+
+    // Move obstacles
+    obstacles.forEach((obs, idx) => {
+      let leftPx = parseFloat(obs.style.left) || window.innerWidth;
+      leftPx -= 5; // Speed: 5px per frame
+      obs.style.left = leftPx + 'px';
+
+      // Remove off-screen obstacles
+      if (leftPx < -obs.offsetWidth) {
+        if (obs.parentNode) obs.parentNode.removeChild(obs);
+        obstacles.splice(idx, 1);
+        score += 1;
+        updateUI();
+      } else {
+        // Collision detection
+        if (checkCollision(dino, obs)) {
+          endGame();
         }
       }
+    });
 
-      if (left < -50) {
-        el.remove();
-        clearInterval(move);
-      }
-    }, 16);
-
-    spawnLoop();
-  }, delay);
-}
-
-// Game loop
-function gameLoop() {
-  if (!gameRunning) return;
-  score++;
-  scoreDisplay.textContent = "Score: " + score;
-  setTimeout(gameLoop, 200);
-}
-
-// Game over
-function gameOver() {
-  gameRunning = false;
-  gameOverScreen.style.display = "flex";
-  const best = parseInt(localStorage.getItem("best_" + playerName)) || 0;
-  if (score > best) {
-    localStorage.setItem("best_" + playerName, score);
+    requestAnimationFrame(gameLoop);
   }
-}
-</script>
-</body>
-  </html>
+
+  // Collision detection helper
+  function checkCollision(a, b) {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+
+    return !(
+      aRect.top > bRect.bottom ||
+      aRect.bottom < bRect.top ||
+      aRect.right < bRect.left ||
+      aRect.left > bRect.right
+    );
+  }
+
+  // Utility: Random integer between min and max
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Button event listeners
+  playBtn.addEventListener('click', () => {
+    playerName = playerNameInput.value.trim();
+    if (!playerName) {
+      alert('Please enter your name.');
+      return;
+    }
+    saveData();
+    startGame();
+  });
+
+  jumpBtn.addEventListener('click', () => jump());
+  slideBtn.addEventListener('click', () => slide());
+
+  // Keyboard controls
+  window.addEventListener('keydown', e => {
+    if (!gameRunning) return;
+    if (e.code === 'Space') {
+      jump();
+      e.preventDefault();
+    } else if (e.code === 'ArrowDown') {
+      slide();
+      e.preventDefault();
+    }
+  });
+
+  // Top menu button handlers
+  btnCharacter.addEventListener('click', () => showModal(characterModal));
+  btnRank.addEventListener('click', () => showModal(rankModal));
+  btnGuide.addEventListener('click', () => showModal(guideModal));
+  btnOption.addEventListener('click', () => showModal(optionModal));
+
+  // Modal close buttons
+  closeCharacterModal.addEventListener('click', () => hideModal(characterModal));
+  closeRankModal.addEventListener('click', () => hideModal(rankModal));
+  closeGuideModal.addEventListener('click', () => hideModal(guideModal));
+  closeOptionModal.addEventListener('click', () => hideModal(optionModal));
+
+  // Initialize
+  loadData();
+
+  // Hide jump/slide buttons initially
+  jumpBtn.style.display = 'none';
+  slideBtn.style.display = 'none';
+
+})();
