@@ -2,22 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>PasuGame Fix Character + Buttons</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PasuGame playable quick</title>
 <style>
-  html, body {
-    margin:0; padding:0; height:100%; width:100%;
-    overflow: hidden;
-    background: #335544 url('Background.webp') no-repeat center/cover;
+  body, html {
+    margin:0; padding:0; height:100%; overflow:hidden;
     font-family: Arial, sans-serif;
+    background: #335544 url('Background.webp') no-repeat center/cover;
   }
   #game {
-    position: relative;
-    width: 100vw; height: 100vh;
+    position: relative; width: 100vw; height: 100vh;
     overflow: hidden;
   }
   #ground {
-    position: absolute; bottom: 0; left: 0; right: 0;
+    position: absolute; bottom:0; left:0; right:0;
     height: 12vh;
     background: url('ground.jpg') repeat-x bottom/auto 12vh;
     z-index: 10;
@@ -26,16 +24,16 @@
     position: absolute;
     bottom: 12vh;
     left: 15vw;
-    width: 16vw;
+    width: 14vw;
     aspect-ratio: 391 / 322;
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: contain;
-    transition: bottom 0.2s ease, height 0.3s ease;
+    transition: bottom 0.15s ease;
     z-index: 20;
   }
   #player.slide {
-    height: calc(16vw * 0.5) !important;
+    height: calc(14vw * 0.5);
   }
   .obstacle {
     position: absolute;
@@ -56,43 +54,28 @@
     box-shadow: 0 0 8px 2px #FFC800;
     z-index: 15;
   }
-  #coinCount, #score {
+  #coinCount {
     position: fixed;
     top: 10px;
+    left: 10px;
     color: white;
     font-weight: 700;
-    font-size: 20px;
-    text-shadow: 0 0 6px #333;
+    font-size: 24px;
     user-select:none;
+    text-shadow: 0 0 4px black;
     z-index: 1000;
   }
-  #coinCount { left: 10px; }
-  #score { right: 10px; }
-
-  #jumpBtn, #slideBtn {
+  #score {
     position: fixed;
-    bottom: 24px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: none;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
-    z-index: 3000;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 24px;
     user-select:none;
-    box-shadow: 0 0 12px #FFC800;
+    text-shadow: 0 0 4px black;
+    z-index: 1000;
   }
-  #jumpBtn {
-    right: 140px;
-    background-image: url('jump.png');
-  }
-  #slideBtn {
-    right: 24px;
-    background-image: url('slide.png');
-  }
-
   #lobby {
     position: fixed;
     inset: 0;
@@ -103,47 +86,68 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
-    font-size: 28px;
+    font-size: 32px;
     z-index: 2000;
   }
   button {
-    padding: 14px 44px;
+    padding: 12px 36px;
     font-size: 24px;
-    border-radius: 14px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     font-weight: 700;
     background: linear-gradient(135deg, #D97448, #B14B1C);
     color: white;
-    box-shadow: 0 5px 10px #572B0D;
+    box-shadow: 0 4px 8px #572B0D;
     user-select:none;
-    transition: background 0.2s ease;
   }
   button:hover {
     background: linear-gradient(135deg, #E78C55, #C65B22);
   }
   #charSelect {
     display: flex;
-    gap: 24px;
+    gap: 20px;
   }
   .charOption {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border: 3px solid transparent;
-    border-radius: 16px;
+    border-radius: 12px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
     cursor: pointer;
-    box-shadow: 0 0 12px #FFD966;
+    box-shadow: 0 0 8px #FFD966;
   }
   .charOption.selected {
     border-color: #FFD966;
   }
+  #jumpBtn, #slideBtn {
+    position: fixed;
+    bottom: 20px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    z-index: 1500;
+    user-select:none;
+  }
+  #jumpBtn {
+    right: 120px;
+    background-image: url('jump.png');
+  }
+  #slideBtn {
+    right: 20px;
+    background-image: url('slide.png');
+  }
   #gameOverScreen {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.75);
     color: white;
     font-size: 36px;
     font-weight: 700;
@@ -151,36 +155,36 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 24px;
-    z-index: 4000;
+    gap: 20px;
+    z-index: 3000;
     display:none;
   }
 </style>
 </head>
 <body>
-<div id="game" role="main" aria-label="PasuGame">
+<div id="game">
   <div id="ground"></div>
-  <div id="player" aria-label="Player character"></div>
-  <div id="coinCount" aria-live="polite" aria-atomic="true">Coins: 0</div>
-  <div id="score" aria-live="polite" aria-atomic="true">Score: 0</div>
+  <div id="player"></div>
+  <div id="coinCount">Coins: 0</div>
+  <div id="score">Score: 0</div>
 
   <button id="jumpBtn" aria-label="Jump"></button>
   <button id="slideBtn" aria-label="Slide"></button>
 
-  <div id="lobby" role="dialog" aria-modal="true" aria-labelledby="lobbyTitle">
-    <h1 id="lobbyTitle">Select Your Character</h1>
-    <div id="charSelect" role="list" aria-label="Character selection">
-      <div class="charOption selected" data-char="myDino.png" role="listitem" tabindex="0" aria-label="Character 1" style="background-image:url('myDino.png')"></div>
-      <div class="charOption" data-char="peet.png" role="listitem" tabindex="0" aria-label="Character 2" style="background-image:url('peet.png')"></div>
-      <div class="charOption" data-char="broin.png" role="listitem" tabindex="0" aria-label="Character 3" style="background-image:url('broin.png')"></div>
+  <div id="lobby" role="dialog" aria-modal="true">
+    <div>Select Your Character</div>
+    <div id="charSelect">
+      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
+      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
     </div>
-    <button id="playBtn" aria-label="Start Game">Play</button>
+    <button id="playBtn">Play</button>
   </div>
 
-  <div id="gameOverScreen" role="alertdialog" aria-modal="true" aria-labelledby="gameOverTitle" tabindex="0">
-    <h2 id="gameOverTitle">Game Over!</h2>
-    <button id="restartBtn" aria-label="Restart Game">Restart</button>
-    <button id="backLobbyBtn" aria-label="Back to Lobby">Back to Lobby</button>
+  <div id="gameOverScreen" role="alertdialog" aria-modal="true">
+    <div>Game Over!</div>
+    <button id="restartBtn">Restart</button>
+    <button id="backLobbyBtn">Back to Lobby</button>
   </div>
 </div>
 
@@ -212,40 +216,27 @@
   let obstacles = [];
   let coins = [];
   let spawnTimer = 0;
-  let spawnInterval = 120;
-  let coinSpawnTimer = 0;
+  let spawnInterval = 120; // frames
   let coinSpawnInterval = 200;
+  let coinSpawnTimer = 0;
   let speed = 5;
   let score = 0;
   let coinsCollected = 0;
   let playerChar = 'myDino.png';
 
-  // Fix: set explicit width and height to player for visibility
-  player.style.width = '16vw';
-  player.style.height = 'auto';
-
-  // Set player character image and show it
   function setPlayerCharacter(src) {
     playerChar = src;
     player.style.backgroundImage = `url('${src}')`;
   }
 
-  // Select character UI
   charOptions.forEach(opt => {
     opt.addEventListener('click', () => {
       charOptions.forEach(c => c.classList.remove('selected'));
       opt.classList.add('selected');
       setPlayerCharacter(opt.dataset.char);
     });
-    opt.addEventListener('keydown', e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        opt.click();
-      }
-    });
   });
 
-  // Reset game state
   function resetGame() {
     gameRunning = true;
     velocityY = 0;
@@ -271,16 +262,13 @@
     player.classList.remove('slide');
   }
 
-  // End game handler
   function endGame() {
     gameRunning = false;
     jumpBtn.style.display = 'none';
     slideBtn.style.display = 'none';
     gameOverScreen.style.display = 'flex';
-    gameOverScreen.focus();
   }
 
-  // Spawn obstacle
   function spawnObstacle() {
     const ob = document.createElement('div');
     ob.classList.add('obstacle');
@@ -289,7 +277,6 @@
     obstacles.push({element: ob, x: window.innerWidth});
   }
 
-  // Spawn coin
   function spawnCoin() {
     const cn = document.createElement('div');
     cn.classList.add('coin');
@@ -298,10 +285,10 @@
     coins.push({element: cn, x: window.innerWidth});
   }
 
-  // Main update loop
   function update() {
     if (!gameRunning) return;
 
+    // Move obstacles and check collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
@@ -311,6 +298,7 @@
       }
       ob.element.style.left = ob.x + 'px';
 
+      // Collision detection with player
       const pRect = player.getBoundingClientRect();
       const oRect = ob.element.getBoundingClientRect();
 
@@ -324,6 +312,7 @@
       }
     });
 
+    // Move coins and check collection
     coins.forEach((cn, i) => {
       cn.x -= speed;
       if (cn.x + cn.element.offsetWidth < 0) {
@@ -333,6 +322,7 @@
       }
       cn.element.style.left = cn.x + 'px';
 
+      // Collision detection for coins
       const pRect = player.getBoundingClientRect();
       const cRect = cn.element.getBoundingClientRect();
 
@@ -349,6 +339,7 @@
       }
     });
 
+    // Spawn obstacles
     spawnTimer++;
     if (spawnTimer > spawnInterval) {
       spawnObstacle();
@@ -356,6 +347,7 @@
       spawnInterval = 100 + Math.random()*80;
     }
 
+    // Spawn coins
     coinSpawnTimer++;
     if (coinSpawnTimer > coinSpawnInterval) {
       spawnCoin();
@@ -363,29 +355,31 @@
       coinSpawnInterval = 150 + Math.random()*100;
     }
 
+    // Handle jump physics
     if (isJumping) {
       velocityY -= gravity;
       let bottomPx = parseFloat(player.style.bottom) || 0;
       bottomPx += velocityY;
-      if (bottomPx <= 12 * window.innerHeight / 100) {
-        bottomPx = 12 * window.innerHeight / 100;
+      if (bottomPx <= 12*window.innerHeight/100) {
+        bottomPx = 12*window.innerHeight/100;
         isJumping = false;
         velocityY = 0;
       }
       player.style.bottom = bottomPx + 'px';
     }
 
+    // Score update
     score++;
     scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
 
     requestAnimationFrame(update);
   }
 
-  // Jump function
+  // Controls
   function jump() {
     if (!gameRunning || isJumping) return;
     isJumping = true;
-    velocityY = 12;
+    velocityY = 18;  // <-- เพิ่มกระโดดสูงขึ้นตรงนี้เท่านั้น
     jumpSound.currentTime = 0;
     jumpSound.play();
     player.classList.remove('slide');
@@ -393,7 +387,6 @@
     if(slideTimeout) clearTimeout(slideTimeout);
   }
 
-  // Slide function
   function slide() {
     if (!gameRunning || isSliding || isJumping) return;
     isSliding = true;
@@ -406,10 +399,8 @@
     }, 1000);
   }
 
-  // Attach events
   jumpBtn.onclick = jump;
   slideBtn.onclick = slide;
-
   window.addEventListener('keydown', e => {
     if (!gameRunning) return;
     if (e.code === 'Space' || e.code === 'ArrowUp') jump();
@@ -420,10 +411,12 @@
     resetGame();
     update();
   };
+
   restartBtn.onclick = () => {
     resetGame();
     update();
   };
+
   backLobbyBtn.onclick = () => {
     gameRunning = false;
     gameOverScreen.style.display = 'none';
@@ -433,12 +426,24 @@
     scoreDisplay.style.display = 'none';
   };
 
-  // Initialize default character
+  // Init
+  setPlayerCharacter = (src) => {
+    player.style.backgroundImage = `url('${src}')`;
+  };
+
   setPlayerCharacter('myDino.png');
   jumpBtn.style.display = 'none';
   slideBtn.style.display = 'none';
   scoreDisplay.style.display = 'none';
 
+  charOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      charOptions.forEach(c => c.classList.remove('selected'));
+      opt.classList.add('selected');
+      setPlayerCharacter(opt.dataset.char);
+      playerChar = opt.dataset.char;
+    });
+  });
 })();
 </script>
 </body>
