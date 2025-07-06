@@ -1,385 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame 3 Characters Playable</title>
+<title>PasuGame Playable</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
-  *{box-sizing:border-box;}
-  body,html {
-    margin:0; padding:0; height:100%;
-    font-family:'Comic Neue', cursive, Arial, sans-serif;
-    background:#335544;
-    overflow:hidden;
+  body, html {
+    margin: 0; padding: 0;
+    height: 100%; overflow: hidden;
+    background: #224 url('Background.webp') no-repeat center/cover;
+    font-family: sans-serif;
   }
   #game {
-    position: relative;
-    width: 100vw; height: 100vh;
-    background: url("Background.webp") no-repeat center center/cover;
+    position: relative; width: 100vw; height: 100vh;
+    overflow: hidden;
   }
   #ground {
-    position: absolute; bottom:0;
-    width:100%; height:12vh;
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 12vh;
     background: url("ground.jpg") repeat-x bottom/auto 12vh;
-    z-index:10;
+    z-index: 5;
   }
-  #chibiCat {
-    position: absolute; bottom:12vh; left:3vw;
-    width:10vw; aspect-ratio:1/1;
-    background: url("catWhite.png") no-repeat center/contain;
-    animation: catBreathe 3s ease-in-out infinite;
-    z-index:20;
-  }
-  @keyframes catBreathe {
-    0%,100% {transform: translateY(0);}
-    50% {transform: translateY(-0.5vh);}
-  }
-  #coinBar {
-    position: fixed; top:10px; left:10px;
-    background: linear-gradient(45deg, #8B3E2F, #D97348);
-    border: 4px solid #7A3B24;
-    border-radius: 12px;
-    padding:6px 16px;
-    display:flex; align-items:center; gap:10px;
-    color:white;
-    font-weight:700;
-    font-size:20px;
-    user-select:none;
-    z-index:1000;
-    box-shadow: 0 0 6px #FFC800;
-  }
-  #coinBar img {width:32px; height:32px;}
-  #score {
-    position: fixed; top:10px; right:20px;
-    font-weight:700;
-    font-size:20px;
-    color:white;
-    text-shadow:0 0 5px #4C2600;
-    user-select:none;
-    z-index:1000;
-  }
-  #lobby {
+  #player {
     position: absolute;
-    inset:0;
-    background: linear-gradient(to bottom, rgba(51, 68, 68, 0.85), rgba(10, 20, 10, 0.9)), url("Background.webp") no-repeat center center/cover;
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 0 20px;
-  }
-  #playBtn {
-    margin-top: 15vh;
-    background: linear-gradient(145deg, #D97448, #B14B1C);
-    border: 3px solid #7A3B24;
-    border-radius: 24px;
-    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3), 0 5px 8px #572B0D;
-    font-size: 48px;
-    color: white;
-    font-weight: 700;
-    padding: 18px 100px;
-    cursor: pointer;
-    user-select: none;
-    text-shadow: 1px 1px 2px #511E0A;
-    transition: transform 0.15s ease;
-  }
-  #playBtn:hover { transform: scale(1.05); }
-  #playBtn:active { transform: scale(0.95); }
-  #topMenu {
-    position: fixed;
-    top: 10px; right: 20px;
-    display: flex; gap: 16px;
-    z-index: 1001;
-  }
-  .hexBtn {
-    --hex-size: 72px;
-    width: var(--hex-size);
-    height: calc(var(--hex-size) * 1.15);
-    background: #C16E33;
-    border: 3px solid #7A3B24;
-    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
-    user-select: none;
-  }
-  .hexBtn:hover { background: #D97448; }
-  .hexBtn img {
-    width: 28px;
-    filter: drop-shadow(0 1px 0 #4F2F0C);
-  }
-  .hexBtn span {
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    text-shadow: 0 0 4px #511E0A;
-  }
-  .modal-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1500;
-  }
-  .modal-panel {
-    background: #fef8ef;
-    border-radius: 14px;
-    box-shadow: 0 0 15px #4f360b;
-    padding: 24px 28px;
-    max-width: 460px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  .closeBtn {
-    position: absolute;
-    top: 12px; right: 14px;
-    font-weight: 900;
-    font-size: 28px;
-    color: #B33A3A;
-    cursor: pointer;
-    user-select: none;
-    line-height: 1;
-  }
-  .closeBtn:hover { color: #FF5555; }
-  #ownedCharacters {
-    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px;
-  }
-  .charItem {
-    width: 110px;
-    background: linear-gradient(145deg, #fef7e3, #f9f3dc);
-    border: 2px solid #B47E29;
-    border-radius: 16px;
-    box-shadow: inset 0 3px 6px #f9f6d7;
-    padding: 10px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .charItem img {
-    width: 80px; height: 80px;
-    object-fit: contain;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  }
-  .charItem button {
-    margin-top: 8px;
-    width: 80%;
-    background: #C16E33;
-    border: none;
-    border-radius: 14px;
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 8px 0;
-    cursor: pointer;
-    text-shadow: 0 0 2px #512F07;
-    transition: background 0.2s ease;
-  }
-  .charItem button:hover { background: #D97448; }
-  #score {
-    position: fixed;
-    top: 10px;
-    right: 20px;
-    font-weight: 700;
-    font-size: 20px;
-    color: white;
-    text-shadow: 0 0 5px #4C2600;
-    user-select: none;
-    z-index: 1000;
-  }
-  #dino {
-    position: absolute;
+    left: 10vw;
     bottom: 12vh;
-    left: 12vw;
     width: 14vw;
     aspect-ratio: 391 / 322;
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: contain;
-    transition: bottom 0.2s ease, height 0.3s ease;
-    z-index: 25;
+    z-index: 10;
   }
-  #dino.slide {
-    height: calc(14vw * 0.5) !important;
+  #player.slide {
+    height: calc(14vw * 0.5);
   }
-  #jumpBtn, #slideBtn {
-    position: fixed;
-    bottom: 20px;
-    width: 90px; height: 90px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 220;
-    display: none;
-    user-select: none;
-  }
-  #jumpBtn {
-    right: 110px;
-    background-image: url("jump.png");
-  }
-  #slideBtn {
-    right: 20px;
-    background-image: url("slide.png");
-  }
-  .obstacle {
+  .obstacle, .coin {
     position: absolute;
     bottom: 12vh;
-    width: 4vw;
-    height: 8vw;
+    z-index: 8;
+  }
+  .obstacle {
+    width: 5vw; height: 10vw;
     background: sienna;
     border-radius: 0.5vw;
-    z-index: 15;
   }
-  .box {
-    position: absolute;
-    bottom: 20vh;
-    width: 4vw;
-    height: 4vw;
+  .coin {
+    bottom: 18vh;
+    width: 4vw; height: 4vw;
     background: gold;
     border-radius: 50%;
     box-shadow: 0 0 8px 2px #FFC800;
-    z-index: 15;
   }
-  #gameOver {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  #ui {
+    position: absolute;
+    top: 10px; left: 10px;
     color: white;
-    font-size: 32px;
-    font-weight: 700;
-    z-index: 500;
+    font-weight: bold;
+    font-size: 18px;
+    z-index: 20;
+    text-shadow: 0 0 4px black;
   }
-  #gameOver button {
-    margin: 12px;
-    padding: 14px 48px;
-    font-size: 20px;
-    border: none;
-    border-radius: 14px;
+  #charSelect {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .char {
+    width: 80px; height: 80px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    border: 3px solid transparent;
     cursor: pointer;
-    font-family: 'Comic Neue', cursive, Arial, sans-serif;
-    font-weight: 700;
   }
-  #gameOver .restartBtn {
-    background: #3A8E3A;
-    color: white;
-    box-shadow: 0 0 8px #2F6F2F;
+  .selected {
+    border-color: yellow;
   }
-  #gameOver .lobbyBtn {
-    background: #B33A3A;
-    color: white;
-    box-shadow: 0 0 8px #7A2424;
+  #controls button {
+    position: fixed;
+    bottom: 20px;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: none;
+    z-index: 99;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
   }
+  #jumpBtn { right: 100px; background-image: url('jump.png'); }
+  #slideBtn { right: 20px; background-image: url('slide.png'); }
 </style>
 </head>
 <body>
 <div id="game">
   <div id="ground"></div>
-  <div id="chibiCat" title="Your cute cat character"></div>
-  <div id="coinBar" title="Fish Coins"><img src="coin.png" alt="Coin Icon" /><span id="coinCount">0</span></div>
-  <div id="score" title="Score" style="display:none;">Score: 0</div>
-  <div id="dino"></div>
-
-  <div id="lobby">
-    <button id="playBtn" title="Start Game">Play</button>
-    <div id="topMenu">
-      <button class="hexBtn" id="btnCharacter" title="Characters">
-        <img src="modelIcon.png" alt="Character Icon" />
-        <span>Character</span>
-      </button>
-      <button class="hexBtn" id="btnRank" title="Leaderboard">
-        <img src="rankIcon.png" alt="Rank Icon" />
-        <span>Rank</span>
-      </button>
-      <button class="hexBtn" id="btnGuide" title="Guide">
-        <img src="guideIcon.png" alt="Guide Icon" />
-        <span>Guide</span>
-      </button>
-      <button class="hexBtn" id="btnOption" title="Options">
-        <img src="optionIcon.png" alt="Option Icon" />
-        <span>Option</span>
-      </button>
+  <div id="player"></div>
+  <div id="ui">
+    Coins: <span id="coinCount">0</span><br>
+    Score: <span id="score">0</span>
+    <div id="charSelect">
+      <div class="char selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+      <div class="char" data-char="peet.png" style="background-image:url('peet.png')"></div>
+      <div class="char" data-char="broin.png" style="background-image:url('broin.png')"></div>
     </div>
+    <button id="startBtn">Play</button>
   </div>
-
-  <!-- Character Modal -->
-  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="characterTitle" tabindex="0">
-      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
-      <h2 id="characterTitle">Characters</h2>
-      <div id="ownedCharacters"></div>
-    </div>
-  </div>
-
-  <!-- Guide Modal -->
-  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="guideTitle" tabindex="0">
-      <h2 id="guideTitle">Game Guide</h2>
-      <p>Welcome to PasuGame! Avoid obstacles and collect boxes for coins.</p>
-      <img src="guide1.png" alt="Guide Image 1" />
-      <p>Use jump and slide buttons or keyboard keys W/S or arrows.</p>
-      <img src="guide2.png" alt="Guide Image 2" />
-      <p>Buy characters with coins in Character menu.</p>
-    </div>
-  </div>
-
-  <!-- Option Modal -->
-  <div id="optionModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="optionTitle" tabindex="0">
-      <span class="closeBtn" id="closeOption" role="button" aria-label="Close Options">×</span>
-      <h2 id="optionTitle">Options</h2>
-      <label><input type="checkbox" id="toggleBGM" checked /> Background Music</label><br/>
-      <label><input type="checkbox" id="toggleSFX" checked /> Sound Effects</label>
-    </div>
-  </div>
-
-  <!-- Game Over -->
-  <div id="gameOver" style="display:none;flex-direction:column;justify-content:center;align-items:center;position:fixed;inset:0;background:rgba(0,0,0,0.75);color:white;font-size:32px;font-weight:700;z-index:500;">
-    <div>Game Over</div>
-    <button id="restartBtn" class="restartBtn">Restart</button>
-    <button id="backLobbyBtn" class="lobbyBtn">Back to Lobby</button>
-  </div>
-
-  <!-- Jump and Slide buttons -->
-  <button id="jumpBtn" title="Jump" aria-label="Jump" style="display:none;"></button>
-  <button id="slideBtn" title="Slide" aria-label="Slide" style="display:none;"></button>
-
 </div>
-
+<button id="jumpBtn"></button>
+<button id="slideBtn"></button>
+<audio id="jumpSound" src="jump.mp3"></audio>
+<audio id="slideSound" src="slide.mp3"></audio>
 <script>
-(() => {
-  // DOM Elements
-  const lobby = document.getElementById('lobby');
-  const playBtn = document.getElementById('playBtn');
-  const characterModal = document.getElementById('characterModal');
-  const guideModal = document.getElementById('guideModal');
-  const optionModal = document.getElementById('optionModal');
-  const closeCharacter = document.getElementById('closeCharacter');
-  const closeGuide = document.getElementById('closeGuide');
-  const closeOption = document.getElementById('closeOption');
-  const btnCharacter = document.getElementById('btnCharacter');
-  const btnGuide = document.getElementById('btnGuide');
-  const btnOption = document.getElementById('btnOption');
-  const coinCountEl = document.getElementById('coinCount');
-  const dino = document.getElementById('dino');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const slideBtn = document.getElementById('slideBtn');
-  const scoreEl = document.getElementById('score');
-  const gameOverEl = document.getElementById('gameOver');
-  const restartBtn = document.getElementById('restartBtn');
+const player = document.getElementById('player');
+const coinCountEl = document.getElementById('coinCount');
+const scoreEl = document.getElementById('score');
+const jumpBtn = document.getElementById('jumpBtn');
+const slideBtn = document.getElementById('slideBtn');
+const jumpSound = document.getElementById('jumpSound');
+const slideSound = document.getElementById('slideSound');
+const startBtn = document.getElementById('startBtn');
+const charOptions = document.querySelectorAll('.char');let velocityY = 0; let isJumping = false; let isSliding = false; let gameRunning = false; let score = 0; let coins = 0; let obstacles = []; let coinsArr = [];
+
+charOptions.forEach(c => c.onclick = () => { charOptions.forEach(o => o.classList.remove('selected')); c.classList.add('selected'); player.style.backgroundImage = url('${c.dataset.char}'); });
+
+function startGame() { score = 0; coins = 0; coinCountEl.textContent = '0'; scoreEl.textContent = '0'; document.getElementById('charSelect').style.display = 'none'; startBtn.style.display = 'none'; jumpBtn.style.display = 'block'; slideBtn.style.display = 'block'; gameRunning = true; spawnLoop(); updateLoop(); }
+
+function spawnLoop() { if (!gameRunning) return; if (Math.random() < 0.5) spawnObstacle(); else spawnCoin(); setTimeout(spawnLoop, 1200); }
+
+function spawnObstacle() { const el = document.createElement('div'); el.className = 'obstacle'; el.style.left = '100vw'; document.getElementById('game').appendChild(el); obstacles.push(el); }
+
+function spawnCoin() { const el = document.createElement('div'); el.className = 'coin'; el.style.left = '100vw'; document.getElementById('game').appendChild(el); coinsArr.push(el); }
+
+function updateLoop() { if (!gameRunning) return;
+
+// move + collision check const speed = 5; obstacles.forEach((ob, i) => { let x = ob.offsetLeft - speed; ob.style.left = x + 'px'; if (x < -50) { ob.remove(); obstacles.splice(i, 1); return; } if (hitTest(ob)) endGame(); }); coinsArr.forEach((coin, i) => { let x = coin.offsetLeft - speed; coin.style.left = x + 'px'; if (x < -50) { coin.remove(); coinsArr.splice(i, 1); return; } if (hitTest(coin)) { coin.remove(); coinsArr.splice(i, 1); coins++; coinCountEl.textContent = coins; } });
+
+if (isJumping) { velocityY -= 0.5; let bottom = parseFloat(player.style.bottom) || 0; bottom += velocityY; if (bottom <= 12 * window.innerHeight / 100) { bottom = 12 * window.innerHeight / 100; isJumping = false; velocityY = 0; } player.style.bottom = bottom + 'px'; } score++; scoreEl.textContent = Math.floor(score / 10); requestAnimationFrame(updateLoop); }
+
+function hitTest(el) { const a = player.getBoundingClientRect(); const b = el.getBoundingClientRect(); return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom); }
+
+jumpBtn.onclick = () => { if (isJumping) return; isJumping = true; velocityY = 12; player.classList.remove('slide'); jumpSound.currentTime = 0; jumpSound.play(); };
+
+slideBtn.onclick = () => { if (isSliding) return; isSliding = true; player.classList.add('slide'); slideSound.currentTime = 0; slideSound.play(); setTimeout(() => { player.classList.remove('slide'); isSliding = false; }, 800); };
+
+function endGame() { gameRunning = false; alert("Game Over\nScore: " + Math.floor(score / 10)); location.reload(); }
+
+startBtn.onclick = startGame; player.style.backgroundImage = "url('myDino.png')"; jumpBtn.style.display = 'none'; slideBtn.style.display = 'none'; </script>
+
+</body>
+</html>
