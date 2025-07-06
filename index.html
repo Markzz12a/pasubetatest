@@ -3,28 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>PasuGame Mobile Portrait Full</title>
+<title>PasuGame Fix Character + Buttons</title>
 <style>
-  /* ==== Reset & base ==== */
-  * {
-    margin:0; padding:0; box-sizing:border-box;
-  }
   html, body {
-    height: 100%; width: 100%;
+    margin:0; padding:0; height:100%; width:100%;
     overflow: hidden;
-    font-family: 'Comic Neue', cursive, Arial, sans-serif;
     background: #335544 url('Background.webp') no-repeat center/cover;
-    touch-action: manipulation;
+    font-family: Arial, sans-serif;
   }
   #game {
     position: relative;
     width: 100vw; height: 100vh;
     overflow: hidden;
-    user-select: none;
   }
   #ground {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
+    position: absolute; bottom: 0; left: 0; right: 0;
     height: 12vh;
     background: url('ground.jpg') repeat-x bottom/auto 12vh;
     z-index: 10;
@@ -63,10 +56,9 @@
     box-shadow: 0 0 8px 2px #FFC800;
     z-index: 15;
   }
-  #coinCount {
+  #coinCount, #score {
     position: fixed;
     top: 10px;
-    left: 10px;
     color: white;
     font-weight: 700;
     font-size: 20px;
@@ -74,17 +66,33 @@
     user-select:none;
     z-index: 1000;
   }
-  #score {
+  #coinCount { left: 10px; }
+  #score { right: 10px; }
+
+  #jumpBtn, #slideBtn {
     position: fixed;
-    top: 10px;
-    right: 10px;
-    color: white;
-    font-weight: 700;
-    font-size: 20px;
-    text-shadow: 0 0 6px #333;
+    bottom: 24px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    z-index: 3000;
     user-select:none;
-    z-index: 1000;
+    box-shadow: 0 0 12px #FFC800;
   }
+  #jumpBtn {
+    right: 140px;
+    background-image: url('jump.png');
+  }
+  #slideBtn {
+    right: 24px;
+    background-image: url('slide.png');
+  }
+
   #lobby {
     position: fixed;
     inset: 0;
@@ -97,7 +105,6 @@
     gap: 20px;
     font-size: 28px;
     z-index: 2000;
-    padding: 0 20px;
   }
   button {
     padding: 14px 44px;
@@ -129,33 +136,9 @@
     background-position: center bottom;
     cursor: pointer;
     box-shadow: 0 0 12px #FFD966;
-    transition: border-color 0.3s ease;
   }
   .charOption.selected {
     border-color: #FFD966;
-  }
-  #jumpBtn, #slideBtn {
-    position: fixed;
-    bottom: 24px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: none;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
-    z-index: 3000;
-    user-select:none;
-    box-shadow: 0 0 12px #FFC800;
-  }
-  #jumpBtn {
-    right: 140px;
-    background-image: url('jump.png');
-  }
-  #slideBtn {
-    right: 24px;
-    background-image: url('slide.png');
   }
   #gameOverScreen {
     position: fixed;
@@ -171,16 +154,6 @@
     gap: 24px;
     z-index: 4000;
     display:none;
-    padding: 0 20px;
-    text-align: center;
-  }
-  #gameOverScreen button {
-    width: 140px;
-  }
-  /* Scrollbar hidden for modals */
-  ::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
   }
 </style>
 </head>
@@ -197,9 +170,9 @@
   <div id="lobby" role="dialog" aria-modal="true" aria-labelledby="lobbyTitle">
     <h1 id="lobbyTitle">Select Your Character</h1>
     <div id="charSelect" role="list" aria-label="Character selection">
-      <div class="charOption selected" data-char="myDino.png" role="listitem" tabindex="0" aria-label="Character 1"></div>
-      <div class="charOption" data-char="peet.png" role="listitem" tabindex="0" aria-label="Character 2"></div>
-      <div class="charOption" data-char="broin.png" role="listitem" tabindex="0" aria-label="Character 3"></div>
+      <div class="charOption selected" data-char="myDino.png" role="listitem" tabindex="0" aria-label="Character 1" style="background-image:url('myDino.png')"></div>
+      <div class="charOption" data-char="peet.png" role="listitem" tabindex="0" aria-label="Character 2" style="background-image:url('peet.png')"></div>
+      <div class="charOption" data-char="broin.png" role="listitem" tabindex="0" aria-label="Character 3" style="background-image:url('broin.png')"></div>
     </div>
     <button id="playBtn" aria-label="Start Game">Play</button>
   </div>
@@ -247,13 +220,17 @@
   let coinsCollected = 0;
   let playerChar = 'myDino.png';
 
-  // Set player character image
+  // Fix: set explicit width and height to player for visibility
+  player.style.width = '16vw';
+  player.style.height = 'auto';
+
+  // Set player character image and show it
   function setPlayerCharacter(src) {
     playerChar = src;
     player.style.backgroundImage = `url('${src}')`;
   }
 
-  // Character selection handling
+  // Select character UI
   charOptions.forEach(opt => {
     opt.addEventListener('click', () => {
       charOptions.forEach(c => c.classList.remove('selected'));
@@ -321,11 +298,10 @@
     coins.push({element: cn, x: window.innerWidth});
   }
 
-  // Game update loop
+  // Main update loop
   function update() {
     if (!gameRunning) return;
 
-    // Move obstacles & collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
@@ -348,7 +324,6 @@
       }
     });
 
-    // Move coins & collection
     coins.forEach((cn, i) => {
       cn.x -= speed;
       if (cn.x + cn.element.offsetWidth < 0) {
@@ -374,7 +349,6 @@
       }
     });
 
-    // Spawn obstacles periodically
     spawnTimer++;
     if (spawnTimer > spawnInterval) {
       spawnObstacle();
@@ -382,7 +356,6 @@
       spawnInterval = 100 + Math.random()*80;
     }
 
-    // Spawn coins periodically
     coinSpawnTimer++;
     if (coinSpawnTimer > coinSpawnInterval) {
       spawnCoin();
@@ -390,7 +363,6 @@
       coinSpawnInterval = 150 + Math.random()*100;
     }
 
-    // Jump physics
     if (isJumping) {
       velocityY -= gravity;
       let bottomPx = parseFloat(player.style.bottom) || 0;
@@ -403,14 +375,13 @@
       player.style.bottom = bottomPx + 'px';
     }
 
-    // Update score
     score++;
     scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
 
     requestAnimationFrame(update);
   }
 
-  // Jump action
+  // Jump function
   function jump() {
     if (!gameRunning || isJumping) return;
     isJumping = true;
@@ -422,7 +393,7 @@
     if(slideTimeout) clearTimeout(slideTimeout);
   }
 
-  // Slide action
+  // Slide function
   function slide() {
     if (!gameRunning || isSliding || isJumping) return;
     isSliding = true;
@@ -435,10 +406,40 @@
     }, 1000);
   }
 
-  // Button handlers
+  // Attach events
   jumpBtn.onclick = jump;
   slideBtn.onclick = slide;
 
-  // Keyboard controls
   window.addEventListener('keydown', e => {
-    if (!
+    if (!gameRunning) return;
+    if (e.code === 'Space' || e.code === 'ArrowUp') jump();
+    if (e.code === 'ArrowDown') slide();
+  });
+
+  playBtn.onclick = () => {
+    resetGame();
+    update();
+  };
+  restartBtn.onclick = () => {
+    resetGame();
+    update();
+  };
+  backLobbyBtn.onclick = () => {
+    gameRunning = false;
+    gameOverScreen.style.display = 'none';
+    lobby.style.display = 'flex';
+    jumpBtn.style.display = 'none';
+    slideBtn.style.display = 'none';
+    scoreDisplay.style.display = 'none';
+  };
+
+  // Initialize default character
+  setPlayerCharacter('myDino.png');
+  jumpBtn.style.display = 'none';
+  slideBtn.style.display = 'none';
+  scoreDisplay.style.display = 'none';
+
+})();
+</script>
+</body>
+</html>
