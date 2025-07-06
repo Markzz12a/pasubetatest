@@ -3,22 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame - Dino Run Full</title>
+<title>PasuGame Full</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
-
-  /* Reset */
   * {
     box-sizing: border-box;
   }
-
-  body, html {
+  html, body {
     margin: 0; padding: 0; height: 100%;
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
-    background: #335544; /* forest green placeholder */
+    background: #335544;
     overflow: hidden;
   }
-
   #game {
     position: relative;
     width: 100vw;
@@ -26,7 +22,6 @@
     background: url("Background.webp") no-repeat center center/cover;
     overflow: hidden;
   }
-
   #ground {
     position: absolute;
     bottom: 0;
@@ -35,7 +30,6 @@
     background: url("ground.jpg") repeat-x bottom/auto 12vh;
     z-index: 10;
   }
-
   #chibiCat {
     position: absolute;
     bottom: 12vh;
@@ -50,8 +44,6 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-0.5vh); }
   }
-
-  /* Coin bar top left */
   #coinBar {
     position: fixed;
     top: 10px;
@@ -73,33 +65,37 @@
     width: 32px;
     height: 32px;
   }
-
-  /* Lobby overlay */
   #lobby {
     position: absolute;
     inset: 0;
     background:
-      url("Background.webp") no-repeat center center/cover;
-    filter: brightness(0.3);
-    z-index: 150;
+      url("Background.webp") no-repeat center center/cover,
+      rgba(0,0,0,0.5);
+    filter: brightness(0.6);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    z-index: 150;
     padding: 0 20px;
+    color: white;
   }
   #lobbyContent {
     position: relative;
     z-index: 200;
-    width: 100%;
-    max-width: 480px;
+    max-width: 400px;
+    width: 90%;
     text-align: center;
-    color: white;
   }
-
-  /* Play button center */
+  #playerNameInput {
+    font-size: 20px;
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: none;
+    margin-bottom: 16px;
+    width: 100%;
+  }
   #playBtn {
-    margin-top: 15vh;
     background: linear-gradient(145deg, #D97448, #B14B1C);
     border: 3px solid #7A3B24;
     border-radius: 24px;
@@ -107,12 +103,12 @@
     font-size: 48px;
     color: white;
     font-weight: 700;
-    padding: 18px 100px;
+    padding: 18px 0;
     cursor: pointer;
     user-select: none;
     text-shadow: 1px 1px 2px #511E0A;
+    width: 100%;
     transition: transform 0.15s ease;
-    font-family: 'Comic Neue', cursive, Arial, sans-serif;
   }
   #playBtn:hover {
     transform: scale(1.05);
@@ -120,8 +116,6 @@
   #playBtn:active {
     transform: scale(0.95);
   }
-
-  /* Top right hex menu */
   #topMenu {
     position: fixed;
     top: 10px;
@@ -149,6 +143,8 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    color: white;
+    user-select: none;
   }
   .hexBtn:hover {
     background: #D97448;
@@ -158,14 +154,10 @@
     filter: drop-shadow(0 1px 0 #4F2F0C);
   }
   .hexBtn span {
-    color: white;
     font-size: 13px;
     font-weight: 700;
     text-shadow: 0 0 4px #511E0A;
-    user-select: none;
   }
-
-  /* Modal background */
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -175,8 +167,6 @@
     justify-content: center;
     z-index: 300;
   }
-
-  /* Modal panel */
   .modal-panel {
     background: #fef8ef;
     border-radius: 14px;
@@ -187,10 +177,8 @@
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    color: #4b3c1a;
+    color: #402E0F;
   }
-
-  /* Close button red X top right */
   .closeBtn {
     position: absolute;
     top: 12px;
@@ -205,8 +193,6 @@
   .closeBtn:hover {
     color: #FF5555;
   }
-
-  /* Character list cookie-run style */
   #ownedCharacters {
     display: flex;
     flex-wrap: wrap;
@@ -249,8 +235,6 @@
   .charItem button:hover {
     background: #D97448;
   }
-
-  /* Confirm buy modal */
   #confirmBuyModal .modal-panel {
     max-width: 380px;
     text-align: center;
@@ -282,8 +266,6 @@
   #confirmNoBtn:hover {
     background: #FF5555;
   }
-
-  /* Guide modal with images */
   #guideModal .modal-panel {
     font-size: 16px;
     line-height: 1.5;
@@ -299,8 +281,6 @@
     margin: 14px 0;
     box-shadow: 0 0 8px #B47E29;
   }
-
-  /* Game UI */
   #score {
     position: fixed;
     top: 10px;
@@ -312,7 +292,6 @@
     user-select: none;
     z-index: 200;
   }
-
   #dino {
     position: absolute;
     bottom: 12vh;
@@ -326,8 +305,6 @@
   #dino.slide {
     height: calc(14vw * 0.5) !important;
   }
-
-  /* Jump and Slide buttons */
   #jumpBtn, #slideBtn {
     position: fixed;
     bottom: 20px;
@@ -339,6 +316,7 @@
     border-radius: 50%;
     cursor: pointer;
     z-index: 220;
+    display: none;
     user-select: none;
   }
   #jumpBtn {
@@ -349,8 +327,6 @@
     right: 20px;
     background-image: url("slide.png");
   }
-
-  /* Obstacles */
   .obstacle {
     position: absolute;
     bottom: 12vh;
@@ -360,7 +336,6 @@
     border-radius: 0.5vw;
     z-index: 15;
   }
-  /* Box coin */
   .box {
     position: absolute;
     bottom: 20vh;
@@ -371,8 +346,6 @@
     box-shadow: 0 0 8px 2px #FFC800;
     z-index: 15;
   }
-
-  /* Game over modal */
   #gameOver {
     position: fixed;
     inset: 0;
@@ -406,8 +379,6 @@
     color: white;
     box-shadow: 0 0 8px #7A2424;
   }
-
-  /* Fix pointer events for buttons */
   #playBtn, .hexBtn, .closeBtn, #confirmYesBtn, #confirmNoBtn, .charItem button, #jumpBtn, #slideBtn {
     pointer-events: auto !important;
     position: relative !important;
@@ -419,7 +390,31 @@
   #lobby > * {
     pointer-events: auto;
   }
-
+  /* Responsive for mobile */
+  @media (max-width: 600px) {
+    #dino {
+      left: 10vw;
+      width: 20vw;
+    }
+    #jumpBtn, #slideBtn {
+      width: 70px;
+      height: 70px;
+      bottom: 15px;
+    }
+    #playBtn {
+      font-size: 36px;
+      padding: 14px 0;
+    }
+    #topMenu {
+      top: 5px;
+      right: 10px;
+      gap: 8px;
+    }
+    .hexBtn {
+      --hex-size: 54px;
+      height: calc(var(--hex-size) * 1.15);
+    }
+  }
 </style>
 </head>
 <body>
@@ -433,41 +428,40 @@
     <span id="coinCount">0</span>
   </div>
 
-  <div id="score" title="Score">Score: 0</div>
+  <div id="score" title="Score" style="display:none;">Score: 0</div>
 
   <div id="dino"></div>
 
   <!-- Lobby -->
-  <div id="lobby">
+  <div id="lobby" aria-label="Lobby screen">
     <div id="lobbyContent">
+      <input id="playerNameInput" type="text" placeholder="Enter your name" maxlength="12" aria-label="Player name input" />
       <button id="playBtn" title="Start Game">Play</button>
+    </div>
 
-      <div id="topMenu">
-        <button class="hexBtn" id="btnCharacter" title="Characters">
-          <img src="modelIcon.png" alt="Character Icon" />
-          <span>Character</span>
-        </button>
-        <button class="hexBtn" id="btnRank" title="Leaderboard">
-          <img src="rankIcon.png" alt="Rank Icon" />
-          <span>Rank</span>
-        </button>
-        <button class="hexBtn" id="btnGuide" title="Guide">
-          <img src="guideIcon.png" alt="Guide Icon" />
-          <span>Guide</span>
-        </button>
-        <button class="hexBtn" id="btnOption" title="Options">
-          <img src="optionIcon.png" alt="Option Icon" />
-          <span>Option</span>
-        </button>
-      </div>
+    <div id="topMenu" role="menu" aria-label="Top menu">
+      <button class="hexBtn" id="btnCharacter" title="Characters" role="menuitem">
+        <img src="modelIcon.png" alt="Character Icon" />
+        <span>Character</span>
+      </button>
+      <button class="hexBtn" id="btnRank" title="Leaderboard" role="menuitem">
+        <img src="rankIcon.png" alt="Rank Icon" />
+        <span>Rank</span>
+      </button>
+      <button class="hexBtn" id="btnGuide" title="Guide" role="menuitem">
+        <img src="guideIcon.png" alt="Guide Icon" />
+        <span>Guide</span>
+      </button>
+      <button class="hexBtn" id="btnOption" title="Options" role="menuitem">
+        <img src="optionIcon.png" alt="Option Icon" />
+        <span>Option</span>
+      </button>
     </div>
   </div>
 
-  <!-- Modals -->
-
   <!-- Character Modal -->
-  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="characterTitle" tabindex="0">
+  <div id="characterModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="characterTitle" tabindex="-1">
+    <div class="modal-panel" role="document">
       <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
       <h2 id="characterTitle">Characters</h2>
       <div id="ownedCharacters"></div>
@@ -475,8 +469,8 @@
   </div>
 
   <!-- Confirm Buy Modal -->
-  <div id="confirmBuyModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="confirmBuyTitle" tabindex="0">
+  <div id="confirmBuyModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmBuyTitle" tabindex="-1">
+    <div class="modal-panel" role="document" style="text-align:center;">
       <span class="closeBtn" id="closeConfirmBuy" role="button" aria-label="Close Buy Confirmation">×</span>
       <h3 id="confirmBuyTitle">Confirm Purchase</h3>
       <p id="confirmBuyText"></p>
@@ -486,34 +480,8 @@
   </div>
 
   <!-- Guide Modal -->
-  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="guideTitle" tabindex="0">
+  <div id="guideModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="guideTitle" tabindex="-1">
+    <div class="modal-panel" role="document">
       <span class="closeBtn" id="closeGuide" role="button" aria-label="Close Guide Modal">×</span>
       <h2 id="guideTitle">Game Guide</h2>
-      <p>Welcome to the Pasugame! This is an endless runner game where you control a dino to avoid obstacles and collect boxes that give you coins.</p>
-      <img src="guide1.png" alt="Gameplay Example 1" />
-      <p>Use the jump and slide buttons (or keyboard keys W/S or arrows) to avoid obstacles. Collect as many boxes as possible to earn coins.</p>
-      <img src="guide2.png" alt="Gameplay Example 2" />
-      <p>Spend your coins in the Character menu to buy new characters. Your progress and coins are saved automatically.</p>
-    </div>
-  </div>
-
-  <!-- Options Modal -->
-  <div id="optionModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="optionTitle" tabindex="0">
-      <span class="closeBtn" id="closeOption" role="button" aria-label="Close Options">×</span>
-      <h2 id="optionTitle">Options</h2>
-      <label>
-        <input type="checkbox" id="toggleBGM" checked /> Background Music
-      </label>
-      <br />
-      <label>
-        <input type="checkbox" id="toggleSFX" checked /> Sound Effects
-      </label>
-    </div>
-  </div>
-
-  <!-- Game Over Modal -->
-  <div id="gameOver" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-panel" role="document" aria-labelledby="gameOverTitle" tabindex="0" style="text-align:center;">
-      <h
+      <p>Welcome to PasuG
