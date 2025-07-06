@@ -3,28 +3,38 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simple PasuGame Working Demo</title>
+<title>PasuGame playable with 3 characters and sound</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
   body, html {
-    margin: 0; padding: 0; height: 100%;
+    margin:0; padding:0; height:100%;
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
     background: #335544;
     overflow: hidden;
   }
   #game {
     position: relative;
-    width: 100vw; height: 100vh;
+    width: 100vw;
+    height: 100vh;
     background: url("Background.webp") no-repeat center center/cover;
   }
   #ground {
-    position: absolute; bottom: 0; width: 100%; height: 12vh;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 12vh;
     background: url("ground.jpg") repeat-x bottom/auto 12vh;
     z-index: 10;
   }
   #chibiCat {
-    position: absolute; bottom: 12vh; left: 3vw; width: 10vw; aspect-ratio: 1 / 1;
+    position: absolute;
+    bottom: 12vh;
+    left: 3vw;
+    width: 10vw;
+    aspect-ratio: 1 / 1;
     background: url("catWhite.png") no-repeat center/contain;
     animation: catBreathe 3s ease-in-out infinite;
     z-index: 20;
@@ -34,24 +44,38 @@
     50% { transform: translateY(-0.5vh); }
   }
   #coinBar {
-    position: fixed; top: 10px; left: 10px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
     background: linear-gradient(45deg, #8B3E2F, #D97348);
     border: 4px solid #7A3B24;
     border-radius: 12px;
     padding: 6px 16px;
-    display: flex; align-items: center; gap: 10px;
-    color: white; font-weight: 700; font-size: 20px;
-    user-select: none; z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 20px;
+    user-select: none;
+    z-index: 1000;
     box-shadow: 0 0 6px #FFC800;
   }
-  #coinBar img { width: 32px; height: 32px; }
+  #coinBar img {
+    width: 32px; height: 32px;
+  }
   #lobby {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background:
       linear-gradient(to bottom, rgba(51, 68, 68, 0.85), rgba(10, 20, 10, 0.9)),
       url("Background.webp") no-repeat center center/cover;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 200; padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 0 20px;
   }
   #playBtn {
     margin-top: 15vh;
@@ -71,8 +95,12 @@
   #playBtn:hover { transform: scale(1.05); }
   #playBtn:active { transform: scale(0.95); }
   #topMenu {
-    position: fixed; top: 10px; right: 20px;
-    display: flex; gap: 16px; z-index: 1001;
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 16px;
+    z-index: 1001;
   }
   .hexBtn {
     --hex-size: 72px;
@@ -82,23 +110,35 @@
     border: 3px solid #7A3B24;
     clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
     cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     box-shadow: inset 0 5px 6px rgba(255 255 255 / 0.3);
     user-select: none;
   }
   .hexBtn:hover { background: #D97448; }
-  .hexBtn img { width: 28px; filter: drop-shadow(0 1px 0 #4F2F0C); }
-  .hexBtn span {
-    color: white; font-size: 13px; font-weight: 700; text-shadow: 0 0 4px #511E0A;
+  .hexBtn img {
+    width: 28px;
+    filter: drop-shadow(0 1px 0 #4F2F0C);
   }
-  #characterModal {
-    position: fixed; inset: 0;
+  .hexBtn span {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 0 0 4px #511E0A;
+  }
+  .modal-bg {
+    position: fixed;
+    inset: 0;
     background: rgba(0,0,0,0.85);
     display: none;
-    align-items: center; justify-content: center;
+    align-items: center;
+    justify-content: center;
     z-index: 1500;
   }
-  #characterModal .modal-panel {
+  .modal-panel {
     background: #fef8ef;
     border-radius: 14px;
     box-shadow: 0 0 15px #4f360b;
@@ -110,13 +150,22 @@
     position: relative;
   }
   .closeBtn {
-    position: absolute; top: 12px; right: 14px;
-    font-weight: 900; font-size: 28px; color: #B33A3A;
-    cursor: pointer; user-select: none; line-height: 1;
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-weight: 900;
+    font-size: 28px;
+    color: #B33A3A;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1;
   }
   .closeBtn:hover { color: #FF5555; }
   #ownedCharacters {
-    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 10px;
   }
   .charItem {
     width: 110px;
@@ -125,10 +174,14 @@
     border-radius: 16px;
     box-shadow: inset 0 3px 6px #f9f6d7;
     padding: 10px 8px;
-    display: flex; flex-direction: column; align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .charItem img {
-    width: 80px; height: 80px; object-fit: contain;
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
     border-radius: 12px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
   }
@@ -147,10 +200,26 @@
     transition: background 0.2s ease;
   }
   .charItem button:hover { background: #D97448; }
+  #score {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    font-weight: 700;
+    font-size: 20px;
+    color: white;
+    text-shadow: 0 0 5px #4C2600;
+    user-select: none;
+    z-index: 1000;
+  }
   #dino {
-    position: absolute; bottom: 12vh; left: 12vw;
-    width: 14vw; aspect-ratio: 391 / 322;
-    background: url("myDino.png") no-repeat center bottom/contain;
+    position: absolute;
+    bottom: 12vh;
+    left: 12vw;
+    width: 14vw;
+    aspect-ratio: 391 / 322;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: contain;
     transition: bottom 0.2s ease, height 0.3s ease;
     z-index: 25;
   }
@@ -158,42 +227,77 @@
     height: calc(14vw * 0.5) !important;
   }
   #jumpBtn, #slideBtn {
-    position: fixed; bottom: 20px; width: 90px; height: 90px;
-    background-size: contain; background-position: center; background-repeat: no-repeat;
-    border: none; border-radius: 50%; cursor: pointer;
-    z-index: 220; display: none; user-select: none;
-  }
-  #jumpBtn { right: 110px; background-image: url("jump.png"); }
-  #slideBtn { right: 20px; background-image: url("slide.png"); }
-  #score {
-    position: fixed; top: 10px; right: 20px;
-    font-weight: 700; font-size: 20px; color: white;
-    text-shadow: 0 0 5px #4C2600;
-    user-select: none; z-index: 1000;
+    position: fixed;
+    bottom: 20px;
+    width: 90px; height: 90px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 220;
     display: none;
+    user-select: none;
+  }
+  #jumpBtn {
+    right: 110px;
+    background-image: url("jump.png");
+  }
+  #slideBtn {
+    right: 20px;
+    background-image: url("slide.png");
+  }
+  .obstacle {
+    position: absolute;
+    bottom: 12vh;
+    width: 4vw;
+    height: 8vw;
+    background: sienna;
+    border-radius: 0.5vw;
+    z-index: 15;
+  }
+  .box {
+    position: absolute;
+    bottom: 20vh;
+    width: 4vw;
+    height: 4vw;
+    background: gold;
+    border-radius: 50%;
+    box-shadow: 0 0 8px 2px #FFC800;
+    z-index: 15;
   }
   #gameOver {
-    position: fixed; inset: 0;
+    position: fixed;
+    inset: 0;
     background: rgba(0,0,0,0.75);
     display: none;
-    flex-direction: column; justify-content: center; align-items: center;
-    color: white; font-size: 32px; font-weight: 700;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
     z-index: 500;
   }
   #gameOver button {
-    margin: 12px; padding: 14px 48px;
+    margin: 12px;
+    padding: 14px 48px;
     font-size: 20px;
-    border: none; border-radius: 14px;
+    border: none;
+    border-radius: 14px;
     cursor: pointer;
     font-family: 'Comic Neue', cursive, Arial, sans-serif;
     font-weight: 700;
   }
   #gameOver .restartBtn {
-    background: #3A8E3A; color: white;
+    background: #3A8E3A;
+    color: white;
     box-shadow: 0 0 8px #2F6F2F;
   }
   #gameOver .lobbyBtn {
-    background: #B33A3A; color: white;
+    background: #B33A3A;
+    color: white;
     box-shadow: 0 0 8px #7A2424;
   }
 </style>
@@ -202,11 +306,14 @@
 <div id="game">
   <div id="ground"></div>
   <div id="chibiCat" title="Your cute cat character"></div>
+
   <div id="coinBar" title="Fish Coins">
     <img src="coin.png" alt="Coin Icon" />
     <span id="coinCount">0</span>
   </div>
-  <div id="score">Score: 0</div>
+
+  <div id="score" title="Score" style="display:none;">Score: 0</div>
+
   <div id="dino"></div>
 
   <!-- Lobby -->
@@ -226,187 +333,3 @@
         <span>Guide</span>
       </button>
       <button class="hexBtn" id="btnOption" title="Options">
-        <img src="optionIcon.png" alt="Option Icon" />
-        <span>Option</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Character Modal -->
-  <div id="characterModal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,0.85); z-index:1500; align-items:center; justify-content:center;">
-    <div class="modal-panel" style="background:#fef8ef; border-radius:14px; box-shadow:0 0 15px #4f360b; padding:24px 28px; max-width:460px; width:90%; max-height:80vh; overflow-y:auto; position:relative;">
-      <span class="closeBtn" id="closeCharacter" role="button" aria-label="Close Character Modal">×</span>
-      <h2>Characters</h2>
-      <div id="ownedCharacters"></div>
-    </div>
-  </div>
-
-  <!-- Game Over -->
-  <div id="gameOver">
-    <div>Game Over</div>
-    <button id="restartBtn" class="restartBtn">Restart</button>
-    <button id="backLobbyBtn" class="lobbyBtn">Back to Lobby</button>
-  </div>
-
-  <!-- Jump and Slide Buttons -->
-  <button id="jumpBtn" title="Jump" aria-label="Jump" style="display:none;"></button>
-  <button id="slideBtn" title="Slide" aria-label="Slide" style="display:none;"></button>
-</div>
-
-<script>
-(() => {
-  // Elements
-  const lobby = document.getElementById('lobby');
-  const playBtn = document.getElementById('playBtn');
-  const characterModal = document.getElementById('characterModal');
-  const closeCharacter = document.getElementById('closeCharacter');
-  const btnCharacter = document.getElementById('btnCharacter');
-  const ownedCharactersEl = document.getElementById('ownedCharacters');
-  const dino = document.getElementById('dino');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const slideBtn = document.getElementById('slideBtn');
-  const scoreEl = document.getElementById('score');
-  const gameOverEl = document.getElementById('gameOver');
-  const restartBtn = document.getElementById('restartBtn');
-  const backLobbyBtn = document.getElementById('backLobbyBtn');
-  const coinCountEl = document.getElementById('coinCount');
-
-  // Game vars
-  let coins = 0;
-  let score = 0;
-  let isPlaying = false;
-  let isJumping = false;
-  let isSliding = false;
-  let velocityY = 0;
-  const gravity = -4;
-  const jumpForce = 12;
-  const groundY = 12; // vh bottom position
-  let dinoY = groundY;
-  let obstacles = [];
-  let obstacleInterval;
-  let scoreInterval;
-
-  // Characters
-  const characters = [
-    { id: 'myDino', name: 'Default Dino', img: 'myDino.png' },
-    { id: 'peet', name: 'Peet', img: 'peet.png' },
-    { id: 'broin', name: 'Broin', img: 'broin.png' }
-  ];
-  let ownedCharacters = ['myDino']; // default owned
-  let selectedCharacter = 'myDino';
-
-  function updateDinoSkin() {
-    const c = characters.find(ch => ch.id === selectedCharacter);
-    if (c) {
-      dino.style.backgroundImage = `url(${c.img})`;
-    }
-  }
-
-  function showCharacterModal() {
-    characterModal.style.display = 'flex';
-    characterModal.setAttribute('aria-hidden', 'false');
-    renderCharacterList();
-  }
-
-  function hideCharacterModal() {
-    characterModal.style.display = 'none';
-    characterModal.setAttribute('aria-hidden', 'true');
-  }
-
-  function renderCharacterList() {
-    ownedCharactersEl.innerHTML = '';
-    characters.forEach(char => {
-      const div = document.createElement('div');
-      div.className = 'charItem';
-      div.innerHTML = `
-        <img src="${char.img}" alt="${char.name}" />
-        <button>${selectedCharacter === char.id ? 'Using' : 'Select'}</button>
-      `;
-      const btn = div.querySelector('button');
-      btn.disabled = selectedCharacter === char.id;
-      btn.onclick = () => {
-        selectedCharacter = char.id;
-        updateDinoSkin();
-        renderCharacterList();
-        hideCharacterModal();
-      };
-      ownedCharactersEl.appendChild(div);
-    });
-  }
-
-  function startGame() {
-    if (isPlaying) return;
-    isPlaying = true;
-    score = 0;
-    dinoY = groundY;
-    velocityY = 0;
-    obstacles = [];
-    lobby.style.display = 'none';
-    gameOverEl.style.display = 'none';
-    scoreEl.style.display = 'block';
-    jumpBtn.style.display = 'block';
-    slideBtn.style.display = 'block';
-    updateDinoSkin();
-    dino.style.bottom = `${dinoY}vh`;
-    scoreEl.textContent = 'Score: 0';
-
-    // Simple obstacle spawn for demo
-    obstacleInterval = setInterval(() => {
-      spawnObstacle();
-    }, 2000);
-
-    // Score increase loop
-    scoreInterval = setInterval(() => {
-      score++;
-      scoreEl.textContent = 'Score: ' + score;
-    }, 1000);
-  }
-
-  function endGame() {
-    isPlaying = false;
-    clearInterval(obstacleInterval);
-    clearInterval(scoreInterval);
-    jumpBtn.style.display = 'none';
-    slideBtn.style.display = 'none';
-    gameOverEl.style.display = 'flex';
-  }
-
-  function restartGame() {
-    gameOverEl.style.display = 'none';
-    startGame();
-  }
-
-  function backToLobby() {
-    gameOverEl.style.display = 'none';
-    scoreEl.style.display = 'none';
-    lobby.style.display = 'flex';
-  }
-
-  function spawnObstacle() {
-    // Just demo no real obstacle movement or collision for simplicity
-    // You can add obstacle logic later
-  }
-
-  // Dino movement logic
-  function jump() {
-    if (!isPlaying || isJumping) return;
-    isJumping = true;
-    velocityY = jumpForce;
-  }
-
-  function slide() {
-    if (!isPlaying || isSliding) return;
-    isSliding = true;
-    dino.classList.add('slide');
-    setTimeout(() => {
-      dino.classList.remove('slide');
-      isSliding = false;
-    }, 800);
-  }
-
-  // Game loop for jump physics
-  function gameLoop() {
-    if (isPlaying && isJumping) {
-      velocityY += gravity * 0.1;
-      dinoY += velocityY * 0.1;
-      if (dino
