@@ -2,33 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>PasuGame Complete</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PasuGame playable quick</title>
 <style>
-  /* === Reset & base === */
-  * {
-    box-sizing: border-box;
-  }
   body, html {
-    margin:0; padding:0; height:100%; overflow: hidden;
-    font-family: 'Arial', sans-serif;
+    margin:0; padding:0; height:100%; overflow:hidden;
+    font-family: Arial, sans-serif;
     background: #335544 url('Background.webp') no-repeat center/cover;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select:none;
-    user-select:none;
-  }
-  button {
-    cursor: pointer;
-    user-select:none;
   }
   #game {
-    position: relative;
-    width: 100vw; height: 100vh;
+    position: relative; width: 100vw; height: 100vh;
     overflow: hidden;
   }
   #ground {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
+    position: absolute; bottom:0; left:0; right:0;
     height: 12vh;
     background: url('ground.jpg') repeat-x bottom/auto 12vh;
     z-index: 10;
@@ -42,7 +29,7 @@
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: contain;
-    transition: bottom 0.15s ease, height 0.3s ease;
+    transition: bottom 0.15s ease;
     z-index: 20;
   }
   #player.slide {
@@ -74,6 +61,7 @@
     color: white;
     font-weight: 700;
     font-size: 24px;
+    user-select:none;
     text-shadow: 0 0 4px black;
     z-index: 1000;
   }
@@ -84,6 +72,7 @@
     color: white;
     font-weight: 700;
     font-size: 24px;
+    user-select:none;
     text-shadow: 0 0 4px black;
     z-index: 1000;
   }
@@ -99,20 +88,17 @@
     gap: 20px;
     font-size: 32px;
     z-index: 2000;
-    padding: 0 10px;
-  }
-  #lobby > div:first-child {
-    font-weight: 700;
   }
   button {
     padding: 12px 36px;
     font-size: 24px;
     border-radius: 12px;
     border: none;
+    cursor: pointer;
+    font-weight: 700;
     background: linear-gradient(135deg, #D97448, #B14B1C);
     color: white;
     box-shadow: 0 4px 8px #572B0D;
-    font-weight: 700;
     user-select:none;
   }
   button:hover {
@@ -122,15 +108,16 @@
     display: flex;
     gap: 20px;
     overflow-x: auto;
+    width: 80vw;
     padding-bottom: 10px;
-    max-width: 100vw;
   }
+  /* Hide scrollbar but allow scrolling */
   #charSelect::-webkit-scrollbar {
-    height: 8px;
+    display: none;
   }
-  #charSelect::-webkit-scrollbar-thumb {
-    background-color: #b36b24;
-    border-radius: 4px;
+  #charSelect {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   .charOption {
     flex: 0 0 auto;
@@ -143,7 +130,6 @@
     background-position: center bottom;
     cursor: pointer;
     box-shadow: 0 0 8px #FFD966;
-    transition: border-color 0.3s ease;
   }
   .charOption.selected {
     border-color: #FFD966;
@@ -161,27 +147,19 @@
     cursor: pointer;
     z-index: 1500;
     user-select:none;
-    box-shadow: 0 0 10px #fff3;
-    transition: background-color 0.3s ease;
   }
   #jumpBtn {
     right: 120px;
     background-image: url('jump.png');
   }
-  #jumpBtn:hover {
-    background-color: #FFD966cc;
-  }
   #slideBtn {
     right: 20px;
     background-image: url('slide.png');
   }
-  #slideBtn:hover {
-    background-color: #FFD966cc;
-  }
   #gameOverScreen {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0,0,0,0.75);
     color: white;
     font-size: 36px;
     font-weight: 700;
@@ -192,46 +170,35 @@
     gap: 20px;
     z-index: 3000;
     display:none;
-    padding: 20px;
-    text-align: center;
-  }
-  #gameOverScreen button {
-    min-width: 140px;
-  }
-  @media (hover: none) {
-    button:hover {
-      background: linear-gradient(135deg, #D97448, #B14B1C);
-    }
   }
 </style>
 </head>
 <body>
-<div id="game" aria-label="Game Area" role="main">
-  <div id="ground" aria-hidden="true"></div>
-  <div id="player" aria-label="Player Character" role="img"></div>
-  <div id="coinCount" aria-live="polite" aria-atomic="true">Coins: 0</div>
-  <div id="score" aria-live="polite" aria-atomic="true">Score: 0</div>
+<div id="game">
+  <div id="ground"></div>
+  <div id="player"></div>
+  <div id="coinCount">Coins: 0</div>
+  <div id="score">Score: 0</div>
 
-  <button id="jumpBtn" aria-label="Jump Button" title="Jump"></button>
-  <button id="slideBtn" aria-label="Slide Button" title="Slide"></button>
+  <button id="jumpBtn" aria-label="Jump"></button>
+  <button id="slideBtn" aria-label="Slide"></button>
 
-  <div id="lobby" role="dialog" aria-modal="true" aria-labelledby="lobbyTitle">
-    <div id="lobbyTitle">Select Your Character</div>
-    <div id="charSelect" tabindex="0" aria-label="Character selection list">
-      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')" tabindex="0" role="button" aria-pressed="true" aria-label="Select myDino"></div>
-      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select Peet"></div>
-      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select Broin"></div>
-      <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select Character 4"></div>
-      <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select Character 5"></div>
+  <div id="lobby" role="dialog" aria-modal="true">
+    <div>Select Your Character</div>
+    <div id="charSelect">
+      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
+      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
+      <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
+      <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
     </div>
-    <button id="playBtn" aria-label="Start Game Button">Play</button>
+    <button id="playBtn">Play</button>
   </div>
 
-  <div id="gameOverScreen" role="alertdialog" aria-modal="true" aria-labelledby="gameOverTitle" aria-describedby="gameOverDesc">
-    <div id="gameOverTitle">Game Over!</div>
-    <div id="gameOverDesc">Your score and coins collected will reset.</div>
-    <button id="restartBtn" aria-label="Restart Game Button">Restart</button>
-    <button id="backLobbyBtn" aria-label="Back to Lobby Button">Back to Lobby</button>
+  <div id="gameOverScreen" role="alertdialog" aria-modal="true">
+    <div>Game Over!</div>
+    <button id="restartBtn">Restart</button>
+    <button id="backLobbyBtn">Back to Lobby</button>
   </div>
 </div>
 
@@ -245,7 +212,8 @@
   const scoreDisplay = document.getElementById('score');
   const lobby = document.getElementById('lobby');
   const playBtn = document.getElementById('playBtn');
-  const charSelect = document.getElementById('charSelect');
+  const charSelectContainer = document.getElementById('charSelect');
+  const charOptions = document.querySelectorAll('.charOption');
   const jumpBtn = document.getElementById('jumpBtn');
   const slideBtn = document.getElementById('slideBtn');
   const gameOverScreen = document.getElementById('gameOverScreen');
@@ -271,48 +239,28 @@
   let coinsCollected = 0;
   let playerChar = 'myDino.png';
 
-  // Set player sprite background
   function setPlayerCharacter(src) {
     playerChar = src;
     player.style.backgroundImage = `url('${src}')`;
   }
 
-  // Select character event
-  function onCharSelect(e) {
-    if(!e.target.classList.contains('charOption')) return;
-    const selected = charSelect.querySelector('.selected');
-    if(selected) {
-      selected.classList.remove('selected');
-      selected.setAttribute('aria-pressed', 'false');
-    }
-    e.target.classList.add('selected');
-    e.target.setAttribute('aria-pressed', 'true');
-    setPlayerCharacter(e.target.dataset.char);
-  }
-
-  charSelect.addEventListener('click', onCharSelect);
-
-  // Keyboard support for character selection
-  charSelect.addEventListener('keydown', (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onCharSelect({ target: document.activeElement });
-    }
+  charOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      charOptions.forEach(c => c.classList.remove('selected'));
+      opt.classList.add('selected');
+      setPlayerCharacter(opt.dataset.char);
+    });
   });
 
-  // Reset all game states to start fresh
   function resetGame() {
     gameRunning = true;
     velocityY = 0;
     isJumping = false;
     isSliding = false;
-
-    // Remove old obstacles and coins from DOM
     obstacles.forEach(ob => ob.element.remove());
     obstacles = [];
     coins.forEach(cn => cn.element.remove());
     coins = [];
-
     spawnTimer = 0;
     coinSpawnTimer = 0;
     score = 0;
@@ -324,13 +272,11 @@
     slideBtn.style.display = 'block';
     gameOverScreen.style.display = 'none';
     lobby.style.display = 'none';
-
     setPlayerCharacter(playerChar);
     player.style.bottom = '12vh';
     player.classList.remove('slide');
   }
 
-  // End game, show game over screen and hide controls
   function endGame() {
     gameRunning = false;
     jumpBtn.style.display = 'none';
@@ -338,7 +284,6 @@
     gameOverScreen.style.display = 'flex';
   }
 
-  // Spawn obstacles dynamically
   function spawnObstacle() {
     const ob = document.createElement('div');
     ob.classList.add('obstacle');
@@ -347,7 +292,6 @@
     obstacles.push({element: ob, x: window.innerWidth});
   }
 
-  // Spawn coins dynamically
   function spawnCoin() {
     const cn = document.createElement('div');
     cn.classList.add('coin');
@@ -356,41 +300,18 @@
     coins.push({element: cn, x: window.innerWidth});
   }
 
-  // Main game loop, update everything frame by frame
   function update() {
     if (!gameRunning) return;
 
-    // Move obstacles, detect collision
+    // Move obstacles and check collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
         ob.element.remove();
-        obstacles.splice(i, 1);
+        obstacles.splice(i,1);
         return;
       }
       ob.element.style.left = ob.x + 'px';
 
-      const pRect = player.getBoundingClientRect();
-      const oRect = ob.element.getBoundingClientRect();
-
-      if (
-        pRect.right > oRect.left + 5 &&
-        pRect.left < oRect.right - 5 &&
-        pRect.bottom > oRect.top + 5 &&
-        pRect.top < oRect.bottom - 5
-      ) {
-        endGame();
-      }
-    });
-
-    // Move coins, detect collection
-    coins.forEach((cn, i) => {
-      cn.x -= speed;
-      if (cn.x + cn.element.offsetWidth < 0) {
-        cn.element.remove();
-        coins.splice(i, 1);
-        return;
-      }
-      cn.element.style.left = cn.x + 'px';
-
-      const pRect = player.getBoundingClient
+      // Collision detection with player
+      const pRect = player.getBoundingClientRect
