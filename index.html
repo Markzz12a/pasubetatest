@@ -194,13 +194,12 @@
 <audio id="slideSound" src="slide.mp3" preload="auto"></audio>
 
 <script>
-(() => {
+window.addEventListener('DOMContentLoaded', () => {
   const player = document.getElementById('player');
   const coinCountDisplay = document.getElementById('coinCount');
   const scoreDisplay = document.getElementById('score');
   const lobby = document.getElementById('lobby');
   const playBtn = document.getElementById('playBtn');
-  const charOptions = document.querySelectorAll('.charOption');
   const jumpBtn = document.getElementById('jumpBtn');
   const slideBtn = document.getElementById('slideBtn');
   const gameOverScreen = document.getElementById('gameOverScreen');
@@ -208,6 +207,8 @@
   const backLobbyBtn = document.getElementById('backLobbyBtn');
   const jumpSound = document.getElementById('jumpSound');
   const slideSound = document.getElementById('slideSound');
+
+  let charOptions = document.querySelectorAll('.charOption');
 
   let gameRunning = false;
   let gravity = 0.6;
@@ -419,20 +420,12 @@
     scoreDisplay.style.display = 'none';
   };
 
+  // Initialize UI state
   setPlayerCharacter(playerChar);
   jumpBtn.style.display = 'none';
   slideBtn.style.display = 'none';
   scoreDisplay.style.display = 'none';
-
-  charOptions.forEach(opt => {
-    opt.addEventListener('click', () => {
-      charOptions.forEach(c => c.classList.remove('selected'));
-      opt.classList.add('selected');
-      setPlayerCharacter(opt.dataset.char);
-      playerChar = opt.dataset.char;
-    });
-  });
-})();
+});
 </script>
 </body>
 </html>
