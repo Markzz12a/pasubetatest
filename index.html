@@ -104,14 +104,40 @@
   button:hover {
     background: linear-gradient(135deg, #E78C55, #C65B22);
   }
+  /* เพิ่มปุ่มเลื่อนตัวละคร */
+  #charSelectWrapper {
+    position: relative;
+    width: 80vw;
+    display: flex;
+    align-items: center;
+  }
+  #scrollLeftBtn, #scrollRightBtn {
+    background: #B14B1C;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 28px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    user-select:none;
+    box-shadow: 0 2px 5px #572B0D;
+  }
+  #scrollLeftBtn:active, #scrollRightBtn:active {
+    background: #E78C55;
+  }
   #charSelect {
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    width: 80vw;
-    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    padding: 10px 0;
+    margin: 0 10px;
+    border: 2px solid #FFD966;
+    border-radius: 12px;
+    flex-grow: 1;
   }
-  /* Hide scrollbar but allow scrolling */
+  /* ซ่อน scrollbar แต่ยังเลื่อนได้ */
   #charSelect::-webkit-scrollbar {
     display: none;
   }
@@ -185,12 +211,16 @@
 
   <div id="lobby" role="dialog" aria-modal="true">
     <div>Select Your Character</div>
-    <div id="charSelect">
-      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
-      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
-      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
-      <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
-      <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
+    <div id="charSelectWrapper">
+      <button id="scrollLeftBtn" aria-label="Scroll Left">&lt;</button>
+      <div id="charSelect">
+        <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+        <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
+        <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
+        <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
+        <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
+      </div>
+      <button id="scrollRightBtn" aria-label="Scroll Right">&gt;</button>
     </div>
     <button id="playBtn">Play</button>
   </div>
@@ -212,7 +242,7 @@
   const scoreDisplay = document.getElementById('score');
   const lobby = document.getElementById('lobby');
   const playBtn = document.getElementById('playBtn');
-  const charSelectContainer = document.getElementById('charSelect');
+  const charSelect = document.getElementById('charSelect');
   const charOptions = document.querySelectorAll('.charOption');
   const jumpBtn = document.getElementById('jumpBtn');
   const slideBtn = document.getElementById('slideBtn');
@@ -221,6 +251,8 @@
   const backLobbyBtn = document.getElementById('backLobbyBtn');
   const jumpSound = document.getElementById('jumpSound');
   const slideSound = document.getElementById('slideSound');
+  const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+  const scrollRightBtn = document.getElementById('scrollRightBtn');
 
   let gameRunning = false;
   let gravity = 0.6;
@@ -250,6 +282,13 @@
       opt.classList.add('selected');
       setPlayerCharacter(opt.dataset.char);
     });
+  });
+
+  scrollLeftBtn.addEventListener('click', () => {
+    charSelect.scrollBy({left: -120, behavior: 'smooth'});
+  });
+  scrollRightBtn.addEventListener('click', () => {
+    charSelect.scrollBy({left: 120, behavior: 'smooth'});
   });
 
   function resetGame() {
@@ -303,7 +342,6 @@
   function update() {
     if (!gameRunning) return;
 
-    // Move obstacles and check collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
@@ -313,5 +351,120 @@
       }
       ob.element.style.left = ob.x + 'px';
 
-      // Collision detection with player
-      const pRect = player.getBoundingClientRect
+      const pRect = player.getBoundingClientRect();
+      const oRect = ob.element.getBoundingClientRect();
+
+      if (
+        pRect.right > oRect.left + 5 &&
+        pRect.left < oRect.right - 5 &&
+        pRect.bottom > oRect.top + 5 &&
+        pRect.top < oRect.bottom - 5
+      ) {
+        endGame();
+      }
+    });
+
+    coins.forEach((cn, i) => {
+      cn.x -= speed;
+      if (cn.x + cn.element.offsetWidth < 0) {
+        cn.element.remove();
+        coins.splice(i,1);
+        return;
+      }
+      cn.element.style.left = cn.x + 'px';
+
+      const pRect = player.getBoundingClientRect();
+      const cRect = cn.element.getBoundingClientRect();
+
+      if (
+        pRect.right > cRect.left + 5 &&
+        pRect.left < cRect.right - 5 &&
+        pRect.bottom > cRect.top + 5 &&
+        pRect.top < cRect.bottom - 5
+      ) {
+        coinsCollected++;
+        coinCountDisplay.textContent = `Coins: ${coinsCollected}`;
+        cn.element.remove();
+        coins.splice(i,1);
+      }
+    });
+
+    spawnTimer++;
+    if (spawnTimer > spawnInterval) {
+      spawnObstacle();
+      spawnTimer = 0;
+      spawnInterval = 100 + Math.random()*80;
+    }
+
+    coinSpawnTimer++;
+    if (coinSpawnTimer > coinSpawnInterval) {
+      spawnCoin();
+      coinSpawnTimer = 0;
+      coinSpawnInterval = 150 + Math.random()*100;
+    }
+
+    if (isJumping) {
+      velocityY -= gravity;
+      let bottomPx = parseFloat(player.style.bottom) || 0;
+      bottomPx += velocityY;
+      if (bottomPx <= 12*window.innerHeight/100) {
+        bottomPx = 12*window.innerHeight/100;
+        isJumping = false;
+        velocityY = 0;
+      }
+      player.style.bottom = bottomPx + 'px';
+    }
+
+    score++;
+    scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
+
+    requestAnimationFrame(update);
+  }
+
+  function jump() {
+    if (!gameRunning || isJumping) return;
+    isJumping = true;
+    velocityY = 18;
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+    player.classList.remove('slide');
+    isSliding = false;
+    if(slideTimeout) clearTimeout(slideTimeout);
+  }
+
+  function slide() {
+    if (!gameRunning || isSliding || isJumping) return;
+    isSliding = true;
+    slideSound.currentTime = 0;
+    slideSound.play();
+    player.classList.add('slide');
+    slideTimeout = setTimeout(() => {
+      isSliding = false;
+      player.classList.remove('slide');
+    }, 1000);
+  }
+
+  jumpBtn.onclick = jump;
+  slideBtn.onclick = slide;
+  window.addEventListener('keydown', e => {
+    if (!gameRunning) return;
+    if (e.code === 'Space' || e.code === 'ArrowUp') jump();
+    if (e.code === 'ArrowDown') slide();
+  });
+
+  playBtn.onclick = () => {
+    resetGame();
+    update();
+  };
+
+  restartBtn.onclick = () => {
+    resetGame();
+    update();
+  };
+
+  backLobbyBtn.onclick = () => {
+    gameRunning = false;
+    gameOverScreen.style.display = 'none';
+    lobby.style.display = 'flex';
+    jumpBtn.style.display = 'none';
+    slideBtn.style.display = 'none';
