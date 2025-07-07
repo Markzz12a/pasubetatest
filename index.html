@@ -290,7 +290,6 @@
   function update() {
     if (!gameRunning) return;
 
-    // Move obstacles and check collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
@@ -300,7 +299,6 @@
       }
       ob.element.style.left = ob.x + 'px';
 
-      // Collision detection with player
       const pRect = player.getBoundingClientRect();
       const oRect = ob.element.getBoundingClientRect();
 
@@ -314,7 +312,6 @@
       }
     });
 
-    // Move coins and check collection
     coins.forEach((cn, i) => {
       cn.x -= speed;
       if (cn.x + cn.element.offsetWidth < 0) {
@@ -324,7 +321,6 @@
       }
       cn.element.style.left = cn.x + 'px';
 
-      // Collision detection for coins
       const pRect = player.getBoundingClientRect();
       const cRect = cn.element.getBoundingClientRect();
 
@@ -341,7 +337,6 @@
       }
     });
 
-    // Spawn obstacles
     spawnTimer++;
     if (spawnTimer > spawnInterval) {
       spawnObstacle();
@@ -349,7 +344,6 @@
       spawnInterval = 100 + Math.random()*80;
     }
 
-    // Spawn coins
     coinSpawnTimer++;
     if (coinSpawnTimer > coinSpawnInterval) {
       spawnCoin();
@@ -357,7 +351,6 @@
       coinSpawnInterval = 150 + Math.random()*100;
     }
 
-    // Handle jump physics
     if (isJumping) {
       velocityY -= gravity;
       let bottomPx = parseFloat(player.style.bottom) || 0;
@@ -370,18 +363,16 @@
       player.style.bottom = bottomPx + 'px';
     }
 
-    // Score update
     score++;
     scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
 
     requestAnimationFrame(update);
   }
 
-  // Controls
   function jump() {
     if (!gameRunning || isJumping) return;
     isJumping = true;
-    velocityY = 18;  // <-- เพิ่มกระโดดสูงขึ้นตรงนี้เท่านั้น
+    velocityY = 18;
     jumpSound.currentTime = 0;
     jumpSound.play();
     player.classList.remove('slide');
@@ -428,12 +419,7 @@
     scoreDisplay.style.display = 'none';
   };
 
-  // Init
-  setPlayerCharacter = (src) => {
-    player.style.backgroundImage = `url('${src}')`;
-  };
-
-  setPlayerCharacter('myDino.png');
+  setPlayerCharacter(playerChar);
   jumpBtn.style.display = 'none';
   slideBtn.style.display = 'none';
   scoreDisplay.style.display = 'none';
