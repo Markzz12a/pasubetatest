@@ -104,49 +104,11 @@
   button:hover {
     background: linear-gradient(135deg, #E78C55, #C65B22);
   }
-  /* เพิ่มปุ่มเลื่อนตัวละคร */
-  #charSelectWrapper {
-    position: relative;
-    width: 80vw;
-    display: flex;
-    align-items: center;
-  }
-  #scrollLeftBtn, #scrollRightBtn {
-    background: #B14B1C;
-    border-radius: 50%;
-    border: none;
-    color: white;
-    font-size: 28px;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    user-select:none;
-    box-shadow: 0 2px 5px #572B0D;
-  }
-  #scrollLeftBtn:active, #scrollRightBtn:active {
-    background: #E78C55;
-  }
   #charSelect {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 10px 0;
-    margin: 0 10px;
-    border: 2px solid #FFD966;
-    border-radius: 12px;
-    flex-grow: 1;
-  }
-  /* ซ่อน scrollbar แต่ยังเลื่อนได้ */
-  #charSelect::-webkit-scrollbar {
-    display: none;
-  }
-  #charSelect {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
   .charOption {
-    flex: 0 0 auto;
     width: 100px;
     height: 100px;
     border: 3px solid transparent;
@@ -211,16 +173,10 @@
 
   <div id="lobby" role="dialog" aria-modal="true">
     <div>Select Your Character</div>
-    <div id="charSelectWrapper">
-      <button id="scrollLeftBtn" aria-label="Scroll Left">&lt;</button>
-      <div id="charSelect">
-        <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
-        <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
-        <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
-        <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
-        <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
-      </div>
-      <button id="scrollRightBtn" aria-label="Scroll Right">&gt;</button>
+    <div id="charSelect">
+      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
+      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
     </div>
     <button id="playBtn">Play</button>
   </div>
@@ -242,7 +198,6 @@
   const scoreDisplay = document.getElementById('score');
   const lobby = document.getElementById('lobby');
   const playBtn = document.getElementById('playBtn');
-  const charSelect = document.getElementById('charSelect');
   const charOptions = document.querySelectorAll('.charOption');
   const jumpBtn = document.getElementById('jumpBtn');
   const slideBtn = document.getElementById('slideBtn');
@@ -251,8 +206,6 @@
   const backLobbyBtn = document.getElementById('backLobbyBtn');
   const jumpSound = document.getElementById('jumpSound');
   const slideSound = document.getElementById('slideSound');
-  const scrollLeftBtn = document.getElementById('scrollLeftBtn');
-  const scrollRightBtn = document.getElementById('scrollRightBtn');
 
   let gameRunning = false;
   let gravity = 0.6;
@@ -282,13 +235,6 @@
       opt.classList.add('selected');
       setPlayerCharacter(opt.dataset.char);
     });
-  });
-
-  scrollLeftBtn.addEventListener('click', () => {
-    charSelect.scrollBy({left: -120, behavior: 'smooth'});
-  });
-  scrollRightBtn.addEventListener('click', () => {
-    charSelect.scrollBy({left: 120, behavior: 'smooth'});
   });
 
   function resetGame() {
@@ -342,6 +288,7 @@
   function update() {
     if (!gameRunning) return;
 
+    // Move obstacles and check collision
     obstacles.forEach((ob, i) => {
       ob.x -= speed;
       if (ob.x + ob.element.offsetWidth < 0) {
@@ -351,6 +298,7 @@
       }
       ob.element.style.left = ob.x + 'px';
 
+      // Collision detection with player
       const pRect = player.getBoundingClientRect();
       const oRect = ob.element.getBoundingClientRect();
 
@@ -364,6 +312,7 @@
       }
     });
 
+    // Move coins and check collection
     coins.forEach((cn, i) => {
       cn.x -= speed;
       if (cn.x + cn.element.offsetWidth < 0) {
@@ -373,6 +322,7 @@
       }
       cn.element.style.left = cn.x + 'px';
 
+      // Collision detection for coins
       const pRect = player.getBoundingClientRect();
       const cRect = cn.element.getBoundingClientRect();
 
@@ -389,6 +339,7 @@
       }
     });
 
+    // Spawn obstacles
     spawnTimer++;
     if (spawnTimer > spawnInterval) {
       spawnObstacle();
@@ -396,6 +347,7 @@
       spawnInterval = 100 + Math.random()*80;
     }
 
+    // Spawn coins
     coinSpawnTimer++;
     if (coinSpawnTimer > coinSpawnInterval) {
       spawnCoin();
@@ -403,6 +355,7 @@
       coinSpawnInterval = 150 + Math.random()*100;
     }
 
+    // Handle jump physics
     if (isJumping) {
       velocityY -= gravity;
       let bottomPx = parseFloat(player.style.bottom) || 0;
@@ -415,16 +368,18 @@
       player.style.bottom = bottomPx + 'px';
     }
 
+    // Score update
     score++;
     scoreDisplay.textContent = `Score: ${Math.floor(score/10)}`;
 
     requestAnimationFrame(update);
   }
 
+  // Controls
   function jump() {
     if (!gameRunning || isJumping) return;
     isJumping = true;
-    velocityY = 18;
+    velocityY = 18;  // <-- เพิ่มกระโดดสูงขึ้นตรงนี้เท่านั้น
     jumpSound.currentTime = 0;
     jumpSound.play();
     player.classList.remove('slide');
@@ -468,3 +423,28 @@
     lobby.style.display = 'flex';
     jumpBtn.style.display = 'none';
     slideBtn.style.display = 'none';
+    scoreDisplay.style.display = 'none';
+  };
+
+  // Init
+  setPlayerCharacter = (src) => {
+    player.style.backgroundImage = `url('${src}')`;
+  };
+
+  setPlayerCharacter('myDino.png');
+  jumpBtn.style.display = 'none';
+  slideBtn.style.display = 'none';
+  scoreDisplay.style.display = 'none';
+
+  charOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      charOptions.forEach(c => c.classList.remove('selected'));
+      opt.classList.add('selected');
+      setPlayerCharacter(opt.dataset.char);
+      playerChar = opt.dataset.char;
+    });
+  });
+})();
+</script>
+</body>
+</html>
