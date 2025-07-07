@@ -1,165 +1,171 @@
-<!DOCTYPE html><html lang="en">
+# Save the full HTML code into a file so user can download it
+html_code = '''
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PasuGame</title>
-<style>
-  body, html {
-    margin:0; padding:0; height:100%; overflow:hidden;
-    font-family: Arial, sans-serif;
-    background: #335544 url('Background.webp') no-repeat center/cover;
-  }
-  #game {
-    position: relative; width: 100vw; height: 100vh;
-    overflow: hidden;
-  }
-  #ground {
-    position: absolute; bottom:0; left:0; right:0;
-    height: 12vh;
-    background: url('ground.jpg') repeat-x bottom/auto 12vh;
-    z-index: 10;
-  }
-  #player {
-    position: absolute;
-    bottom: 12vh;
-    left: 15vw;
-    width: 14vw;
-    aspect-ratio: 391 / 322;
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: contain;
-    transition: bottom 0.15s ease;
-    z-index: 20;
-  }
-  #player.slide {
-    height: calc(14vw * 0.5);
-  }
-  .obstacle {
-    position: absolute;
-    bottom: 12vh;
-    width: 5vw;
-    height: 10vw;
-    background: sienna;
-    border-radius: 0.5vw;
-    z-index: 15;
-  }
-  .coin {
-    position: absolute;
-    bottom: 18vh;
-    width: 4vw;
-    height: 4vw;
-    background: gold;
-    border-radius: 50%;
-    box-shadow: 0 0 8px 2px #FFC800;
-    z-index: 15;
-  }
-  #coinCount, #score {
-    position: fixed;
-    top: 10px;
-    font-weight: 700;
-    font-size: 24px;
-    color: white;
-    text-shadow: 0 0 4px black;
-    z-index: 1000;
-  }
-  #coinCount { left: 10px; }
-  #score { right: 10px; }
-  #lobby {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    color: white;
-    font-size: 32px;
-    gap: 20px;
-    z-index: 2000;
-  }
-  button {
-    padding: 12px 36px;
-    font-size: 24px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-weight: 700;
-    background: linear-gradient(135deg, #D97448, #B14B1C);
-    color: white;
-    box-shadow: 0 4px 8px #572B0D;
-    user-select:none;
-  }
-  #charSelect {
-    display: flex;
-    overflow-x: auto;
-    max-width: 90vw;
-    gap: 20px;
-    padding: 10px;
-  }
-  .charOption {
-    width: 100px; height: 100px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    border-radius: 12px;
-    box-shadow: 0 0 8px #FFD966;
-    border: 3px solid transparent;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .charOption.selected { border-color: #FFD966; }
-  #jumpBtn, #slideBtn {
-    position: fixed;
-    bottom: 20px;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: none;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
-    z-index: 1500;
-    user-select:none;
-  }
-  #jumpBtn { right: 120px; background-image: url('jump.png'); }
-  #slideBtn { right: 20px; background-image: url('slide.png'); }
-  #gameOverScreen {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    color: white;
-    font-size: 36px;
-    font-weight: 700;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    z-index: 3000;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PasuGame Fixed</title>
+  <style>
+    body, html {
+      margin:0; padding:0; height:100%; overflow:hidden;
+      font-family: Arial, sans-serif;
+      background: #335544 url('Background.webp') no-repeat center/cover;
+    }
+    #game {
+      position: relative; width: 100vw; height: 100vh;
+      overflow: hidden;
+    }
+    #ground {
+      position: absolute; bottom:0; left:0; right:0;
+      height: 12vh;
+      background: url('ground.jpg') repeat-x bottom/auto 12vh;
+      z-index: 10;
+    }
+    #player {
+      position: absolute;
+      bottom: 12vh;
+      left: 15vw;
+      width: 14vw;
+      aspect-ratio: 391 / 322;
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      background-size: contain;
+      transition: bottom 0.15s ease;
+      z-index: 20;
+    }
+    #player.slide {
+      height: calc(14vw * 0.5);
+    }
+    .obstacle {
+      position: absolute;
+      bottom: 12vh;
+      width: 5vw;
+      height: 10vw;
+      background: sienna;
+      border-radius: 0.5vw;
+      z-index: 15;
+    }
+    .coin {
+      position: absolute;
+      bottom: 18vh;
+      width: 4vw;
+      height: 4vw;
+      background: gold;
+      border-radius: 50%;
+      box-shadow: 0 0 8px 2px #FFC800;
+      z-index: 15;
+    }
+    #coinCount {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 24px;
+      user-select:none;
+      text-shadow: 0 0 4px black;
+      z-index: 1000;
+    }
+    #score {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-weight: 700;
+      font-size: 24px;
+      user-select:none;
+      text-shadow: 0 0 4px black;
+      z-index: 1000;
+    }
+    #lobby {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      font-size: 32px;
+      z-index: 2000;
+    }
+    button {
+      padding: 12px 36px;
+      font-size: 24px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(135deg, #D97448, #B14B1C);
+      color: white;
+      box-shadow: 0 4px 8px #572B0D;
+      user-select:none;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #E78C55, #C65B22);
+    }
+    #charSelect {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 10px;
+      max-width: 90vw;
+    }
+    .charOption {
+      flex: 0 0 auto;
+      width: 100px;
+      height: 100px;
+      border: 3px solid transparent;
+      border-radius: 12px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      cursor: pointer;
+      box-shadow: 0 0 8px #FFD966;
+    }
+    .charOption.selected {
+      border-color: #FFD966;
+    }
+    #jumpBtn, #slideBtn {
+      position: fixed;
+      bottom: 20px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      cursor: pointer;
+      z-index: 1500;
+      user-select:none;
+    }
+    #jumpBtn {
+      right: 120px;
+      background-image: url('jump.png');
+    }
+    #slideBtn {
+      right: 20px;
+      background-image: url('slide.png');
+    }
+    #gameOverScreen {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      z-index: 3000;
+      display:none;
+    }
+  </style>
 </head>
 <body>
-<div id="game">
-  <div id="ground"></div>
-  <div id="player"></div>
-  <div id="coinCount">Coins: 0</div>
-  <div id="score">Score: 0</div>
-  <button id="jumpBtn"></button>
-  <button id="slideBtn"></button>
-  <div id="lobby">
-    <div>Select Your Character</div>
-    <div id="charSelect">
-      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
-      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
-      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
-      <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
-      <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
-    </div>
-    <button id="playBtn">Play</button>
-  </div>
-  <div id="gameOverScreen">
-    <div>Game Over!</div>
-    <button id="restartBtn">Restart</button>
-    <button id="backLobbyBtn">Back to Lobby</button>
-  </div>
-</div>
-<audio id="jumpSound" src="jump.mp3" preload="auto"></audio>
-<audio id="slideSound" src="slide
+
