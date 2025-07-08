@@ -1,739 +1,344 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<title>PasuGame Dino Runner Complete</title>
-<style>
-  /* Reset */
-  * {
-    margin:0; padding:0; box-sizing:border-box;
-    user-select:none;
-  }
-  html, body {
-    width: 100%; height: 100%;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #2a4d34 url('Background.webp') no-repeat center center/cover;
-  }
-  body {
-    display: flex; justify-content: center; align-items: center;
-  }
-  #gameContainer {
-    position: relative;
-    width: 100vw; height: 100vh;
-    overflow: hidden;
-    background: transparent;
-  }
-  /* LOBBY */
-  #lobby {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.8);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 20px;
-    z-index: 9999;
-  }
-  #lobby h1 {
-    font-size: 3rem;
-    color: #ffd966;
-    text-shadow: 0 0 12px #ffb800;
-    font-weight: 900;
-  }
-  #coinDisplay {
-    font-size: 1.8rem;
-    background: rgba(255, 215, 0, 0.9);
-    color: #000;
-    padding: 6px 14px;
-    border-radius: 24px;
-    font-weight: 700;
-    box-shadow: 0 0 8px #fff799;
-  }
-  /* Character selection container horizontal scroll */
-  #charSelectContainer {
-    width: 90vw;
-    max-width: 700px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-  }
-  #charSelect {
-    display: flex;
-    gap: 15px;
-    width: max-content;
-  }
-  .charOption {
-    flex: 0 0 auto;
-    width: 110px;
-    height: 110px;
-    background-color: #333;
-    border-radius: 16px;
-    border: 3px solid transparent;
-    background-position: center bottom;
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(255,255,102,0.5);
-    transition: border-color 0.3s ease;
-  }
-  .charOption.selected {
-    border-color: #ffd966;
-    box-shadow: 0 0 18px 6px #ffb800;
-  }
-  /* Buttons under character */
-  #buttonsContainer {
-    display: flex;
-    gap: 20px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  button.lobbyBtn {
-    font-size: 1.5rem;
-    padding: 12px 36px;
-    border-radius: 28px;
-    background: linear-gradient(135deg, #f3c14a, #b87a0e);
-    border: none;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 4px 12px #7a4f02;
-    user-select:none;
-    transition: background 0.3s ease;
-  }
-  button.lobbyBtn:hover {
-    background: linear-gradient(135deg, #f7d95f, #d49d2a);
-  }
-  #topRightMenu {
-    position: fixed;
-    top: 14px; right: 14px;
-    display: flex; gap: 12px;
-    z-index: 10000;
-  }
-  #topRightMenu button {
-    padding: 10px 16px;
-    font-size: 16px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #9d7e44, #6b5727);
-    box-shadow: 0 3px 6px #4b3a1b;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    user-select:none;
-    transition: background 0.3s ease;
-  }
-  #topRightMenu button:hover {
-    background: linear-gradient(135deg, #c6a350, #8d6f2f);
-  }
-  /* Panels */
-  .panel {
-    position: fixed;
-    top: 60px; right: 14px;
-    background: rgba(0,0,0,0.9);
-    padding: 20px;
-    border-radius: 14px;
-    color: white;
-    font-weight: 700;
-    max-width: 320px;
-    max-height: 60vh;
-    overflow-y: auto;
-    display: none;
-    z-index: 10001;
-  }
-  .panel h2 {
-    margin-bottom: 12px;
-    font-size: 1.8rem;
-  }
-  /* Character panel inside */
-  #characterList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  #characterList .charOption {
-    width: 80px; height: 80px;
-    border-radius: 14px;
-  }
-  #characterList .charOption.selected {
-    border-color: #ffd966;
-  }
-
-  /* Game screen */
-  #gameScreen {
-    position: relative;
-    width: 100vw; height: 100vh;
-    background: #2a4d34 url('Background.webp') no-repeat center center/cover;
-    overflow: hidden;
-    display: none;
-  }
-  #ground {
-    position: absolute; bottom: 0; left: 0; width: 100%;
-    height: 14vh;
-    background: url('ground.jpg') repeat-x bottom/auto 14vh;
-    z-index: 10;
-  }
-  #player {
-    position: absolute;
-    bottom: 14vh;
-    left: 15vw;
-    width: 12vw;
-    aspect-ratio: 391 / 322;
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: contain;
-    transition: bottom 0.15s ease;
-    z-index: 20;
-  }
-  #player.slide {
-    height: calc(12vw * 0.5);
-  }
-  /* Obstacles */
-  .obstacle {
-    position: absolute;
-    border-radius: 0.6vw;
-    z-index: 15;
-    background-color: sienna;
-  }
-  .obstacle.ground {
-    bottom: 14vh;
-    width: 60px;
-    height: 100px;
-  }
-  .obstacle.ceiling {
-    top: 0;
-    width: 120px;
-    height: 60px;
-    background-color: #8b4513;
-    border-radius: 0.6vw 0.6vw 0 0;
-  }
-  /* Coins */
-  .coin {
-    position: absolute;
-    bottom: 22vh;
-    width: 35px;
-    height: 35px;
-    background: gold;
-    border-radius: 50%;
-    box-shadow: 0 0 12px 3px #FFC800;
-    z-index: 15;
-  }
-  /* UI Counters */
-  #coinCounter, #scoreCounter {
-    position: fixed;
-    top: 14px;
-    color: white;
-    font-weight: 900;
-    font-size: 22px;
-    user-select:none;
-    text-shadow: 0 0 6px black;
-    z-index: 1000;
-  }
-  #coinCounter { left: 14px; }
-  #scoreCounter { right: 14px; }
-  /* Mobile buttons */
-  #jumpBtn, #slideBtn {
-    position: fixed;
-    bottom: 22px;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 9998;
-    cursor: pointer;
-    user-select:none;
-  }
-  #jumpBtn {
-    right: 120px;
-    background-image: url('jump.png');
-  }
-  #slideBtn {
-    right: 22px;
-    background-image: url('slide.png');
-  }
-  /* Game Over */
-  #gameOverScreen {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    color: white;
-    font-size: 3rem;
-    font-weight: 900;
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    z-index: 9999;
-  }
-  #gameOverScreen button {
-    font-size: 1.8rem;
-    padding: 14px 48px;
-    border-radius: 36px;
-  }
-
-  /* Responsive landscape lock for mobile */
-  @media screen and (orientation: portrait) {
-    body {
-      transform: rotate(90deg);
-      transform-origin: left top;
-      width: 100vh;
-      height: 100vw;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>PasuGame Final</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
       overflow: hidden;
+      height: 100%;
+      background: url("Background.webp") no-repeat center center/cover;
+      font-family: sans-serif;
+    }
+    #gameCanvas {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    #player {
+      width: 80px;
+      height: 80px;
+      position: absolute;
+      left: 100px;
+      bottom: 120px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      transition: bottom 0.2s;
+    }
+    .slide {
+      height: 40px !important;
+    }
+    .obstacle, .ceilingObstacle {
+      width: 60px;
+      height: 60px;
+      background: brown;
+      position: absolute;
+      bottom: 120px;
+    }
+    .ceilingObstacle {
+      top: 0;
+      bottom: auto;
+      background: darkred;
+    }
+    .coin {
+      width: 40px;
+      height: 40px;
+      background: gold;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 200px;
+      box-shadow: 0 0 10px yellow;
+    }
+    #jumpBtn, #slideBtn {
+      position: absolute;
+      bottom: 20px;
+      width: 70px;
+      height: 70px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+    }
+    #jumpBtn {
+      right: 100px;
+      background-image: url("jump.png");
+    }
+    #slideBtn {
+      right: 20px;
+      background-image: url("slide.png");
+    }
+    #coinCount, #score {
+      position: absolute;
+      top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 5px black;
+      z-index: 10;
+    }
+    #coinCount { left: 10px; }
+    #score { right: 10px; }
+    #lobby {
       position: fixed;
-      top: 100%;
-      left: 0;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
-    #gameContainer, #lobby, #gameScreen {
-      width: 100vh !important;
-      height: 100vw !important;
+    #charSelect {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px;
+      margin-bottom: 20px;
     }
-  }
-</style>
+    .charOption {
+      width: 80px;
+      height: 80px;
+      background-size: cover;
+      background-position: center;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .charOption.selected {
+      border-color: yellow;
+    }
+    #gameOver {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      z-index: 1000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      gap: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background: orange;
+      color: white;
+      cursor: pointer;
+    }
+    @media (orientation: portrait) {
+      body::before {
+        content: "Please rotate your device.";
+        position: fixed;
+        inset: 0;
+        background: #000;
+        color: white;
+        font-size: 30px;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="gameContainer">
+  <div id="gameCanvas">
+    <div id="player"></div>
+    <div id="coinCount">Coins: 0</div>
+    <div id="score">Score: 0</div>
+    <button id="jumpBtn"></button>
+    <button id="slideBtn"></button>
+  </div>
 
-  <!-- LOBBY -->
-  <div id="lobby" role="dialog" aria-modal="true" aria-label="Game Lobby">
-    <h1>PasuGame Dino Runner</h1>
-    <div id="coinDisplay" aria-live="polite">Coins: 0</div>
-
-    <div id="charSelectContainer" tabindex="0" aria-label="Character selection, scroll horizontally">
-      <div id="charSelect">
-        <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')" tabindex="0" role="button" aria-pressed="true" aria-label="Select character myDino"></div>
-        <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select character peet"></div>
-        <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select character broin"></div>
-        <div class="charOption" data-char="char4.png" style="background-image:url('char4.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select character 4"></div>
-        <div class="charOption" data-char="char5.png" style="background-image:url('char5.png')" tabindex="0" role="button" aria-pressed="false" aria-label="Select character 5"></div>
-      </div>
+  <div id="lobby">
+    <h1>PasuGame</h1>
+    <div id="charSelect">
+      <div class="charOption selected" data-char="myDino.png" style="background-image:url('myDino.png')"></div>
+      <div class="charOption" data-char="peet.png" style="background-image:url('peet.png')"></div>
+      <div class="charOption" data-char="broin.png" style="background-image:url('broin.png')"></div>
+      <div class="charOption" data-char="20250707_123932.png" style="background-image:url('20250707_123932.png')"></div>
+      <div class="charOption" data-char="20250707_123608.png" style="background-image:url('20250707_123608.png')"></div>
     </div>
-
-    <div id="buttonsContainer">
-      <button id="playBtn" class="lobbyBtn" aria-label="Start game">Play</button>
-      <button id="btnCharacter" class="lobbyBtn" aria-label="Open Character panel">Character</button>
-      <button id="btnOptions" class="lobbyBtn" aria-label="Open Options panel">Options</button>
-      <button id="btnLeaderboard" class="lobbyBtn" aria-label="Open Leaderboard panel">Leaderboard</button>
-    </div>
+    <button id="playBtn">Play</button>
   </div>
 
-  <!-- Panels -->
-  <div id="characterPanel" class="panel" role="region" aria-label="Character Selection Panel">
-    <h2>Characters</h2>
-    <div id="characterList">
-      <!-- Dynamically populated -->
-    </div>
-    <button id="closeCharacter">Close</button>
+  <div id="gameOver" style="display:none;">
+    <div>Game Over!</div>
+    <button onclick="location.reload()">Restart</button>
   </div>
 
-  <div id="optionPanel" class="panel" role="region" aria-label="Options Panel">
-    <h2>Options</h2>
-    <label><input type="checkbox" id="toggleBGM" checked> Background Music</label>
-    <label><input type="checkbox" id="toggleSFX" checked> Sound Effects</label>
-    <button id="closeOptions">Close</button>
-  </div>
+  <audio id="jumpSound" src="jump.mp3"></audio>
+  <audio id="slideSound" src="slide.mp3"></audio>
 
-  <div id="leaderboardPanel" class="panel" role="region" aria-label="Leaderboard Panel">
-    <h2>Leaderboard</h2>
-    <p>Coming soon...</p>
-    <button id
-="closeLeaderboard">Close</button>
+  <script>
+    const player = document.getElementById('player');
+    const jumpBtn = document.getElementById('jumpBtn');
+    const slideBtn = document.getElementById('slideBtn');
+    const lobby = document.getElementById('lobby');
+    const gameOver = document.getElementById('gameOver');
+    const coinCountEl = document.getElementById('coinCount');
+    const scoreEl = document.getElementById('score');
+    const jumpSound = document.getElementById('jumpSound');
+    const slideSound = document.getElementById('slideSound');
 
-  </div>  <!-- GAME SCREEN -->  <div id="gameScreen" role="main" aria-label="Game Screen" tabindex="0">
-    <div id="ground"></div>
-    <div id="player" aria-label="Player character" role="img"></div>
-    <!-- Obstacles and coins will be appended here dynamically -->
-  </div>  <!-- Controls Mobile --><button id="jumpBtn" aria-label="Jump button"></button> <button id="slideBtn" aria-label="Slide button"></button>
+    let isJumping = false;
+    let isSliding = false;
+    let velocityY = 0;
+    let gravity = 1;
+    let score = 0;
+    let coins = 0;
+    let playerChar = 'myDino.png';
 
-  <!-- UI counters -->  <div id="coinCounter" aria-live="polite" aria-atomic="true">Coins: 0</div>
-  <div id="scoreCounter" aria-live="polite" aria-atomic="true">Score: 0</div>  <!-- Game Over -->  <div id="gameOverScreen" role="dialog" aria-modal="true" aria-label="Game Over Screen">
-    <div>Game Over</div>
-    <button id="restartBtn" aria-label="Restart game">Restart</button>
-    <button id="returnLobbyBtn" aria-label="Return to lobby">Lobby</button>
-  </div>
-</div><script>
-(() => {
-  // Config
-  const JUMP_VELOCITY = 22; // increased jump height
-  const GRAVITY = 1.5;
-  const SLIDE_DURATION = 700; // ms
-  const OBSTACLE_SPEED_START = 8;
-  const OBSTACLE_SPEED_INCREMENT = 0.002;
-  const COIN_SPAWN_CHANCE = 0.3;
-  const OBSTACLE_SPAWN_INTERVAL_MIN = 1500;
-  const OBSTACLE_SPAWN_INTERVAL_MAX = 3000;
-  const CEILING_OBSTACLE_WIDTH = 120;
-  const CEILING_OBSTACLE_HEIGHT = 60;
-
-  // State
-  let gameRunning = false;
-  let jumpPressed = false;
-  let slidePressed = false;
-  let playerY = 0;
-  let playerVelocityY = 0;
-  let isJumping = false;
-  let isSliding = false;
-  let slideTimeout = null;
-  let obstacles = [];
-  let coins = [];
-  let obstacleSpeed = OBSTACLE_SPEED_START;
-  let lastObstacleTime = 0;
-  let lastCoinTime = 0;
-  let score = 0;
-  let coinsCollected = 0;
-  let selectedChar = 'myDino.png';
-
-  // DOM Elements
-  const lobby = document.getElementById('lobby');
-  const gameScreen = document.getElementById('gameScreen');
-  const player = document.getElementById('player');
-  const ground = document.getElementById('ground');
-  const coinCounter = document.getElementById('coinCounter');
-  const scoreCounter = document.getElementById('scoreCounter');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const slideBtn = document.getElementById('slideBtn');
-  const gameOverScreen = document.getElementById('gameOverScreen');
-  const restartBtn = document.getElementById('restartBtn');
-  const returnLobbyBtn = document.getElementById('returnLobbyBtn');
-  const playBtn = document.getElementById('playBtn');
-  const coinDisplay = document.getElementById('coinDisplay');
-
-  // Panels and buttons
-  const btnCharacter = document.getElementById('btnCharacter');
-  const btnOptions = document.getElementById('btnOptions');
-  const btnLeaderboard = document.getElementById('btnLeaderboard');
-  const characterPanel = document.getElementById('characterPanel');
-  const optionPanel = document.getElementById('optionPanel');
-  const leaderboardPanel = document.getElementById('leaderboardPanel');
-  const closeCharacter = document.getElementById('closeCharacter');
-  const closeOptions = document.getElementById('closeOptions');
-  const closeLeaderboard = document.getElementById('closeLeaderboard');
-  const characterList = document.getElementById('characterList');
-  const toggleBGM = document.getElementById('toggleBGM');
-  const toggleSFX = document.getElementById('toggleSFX');
-
-  // Sounds
-  const audioJump = new Audio('jump.wav');
-  const audioSlide = new Audio('slide.wav');
-  const audioCoin = new Audio('coin.wav');
-  const bgm = new Audio('bgm.mp3');
-  bgm.loop = true;
-  bgm.volume = 0.2;
-
-  // Store coins in localStorage
-  let totalCoins = parseInt(localStorage.getItem('pasu_coins')) || 0;
-  updateCoinDisplay();
-
-  // Characters data
-  const characters = [
-    {name: 'myDino', img:'myDino.png', price:0, owned:true},
-    {name: 'peet', img:'peet.png', price:100, owned:false},
-    {name: 'broin', img:'broin.png', price:200, owned:false},
-    {name: 'char4', img:'char4.png', price:300, owned:false},
-    {name: 'char5', img:'char5.png', price:400, owned:false},
-  ];
-
-  // Initialize character ownership
-  characters.forEach(c => {
-    let owned = localStorage.getItem('pasu_char_' + c.name);
-    if(owned === 'true') c.owned = true;
-  });
-
-  // Load selected character from localStorage
-  const savedChar = localStorage.getItem('pasu_selected_char');
-  if(savedChar && characters.find(c => c.name === savedChar && c.owned)) selectedChar = savedChar;
-
-  // Update UI lobby coin display
-  function updateCoinDisplay() {
-    coinDisplay.textContent = `Coins: ${totalCoins}`;
-  }
-  function updateCoinCounter() {
-    coinCounter.textContent = `Coins: ${coinsCollected}`;
-  }
-  function updateScoreCounter() {
-    scoreCounter.textContent = `Score: ${Math.floor(score)}`;
-  }
-
-  // Fill character panel UI
-  function populateCharacterPanel() {
-    characterList.innerHTML = '';
-    characters.forEach(char => {
-      const div = document.createElement('div');
-      div.className = 'charOption';
-      div.style.backgroundImage = `url('${char.img}')`;
-      if(char.name === selectedChar) div.classList.add('selected');
-      div.title = `${char.name} - ${char.owned ? 'Owned' : `Price: ${char.price} coins`}`;
-      div.tabIndex = 0;
-      div.setAttribute('role', 'button');
-      div.setAttribute('aria-pressed', char.name === selectedChar);
-      div.addEventListener('click', () => {
-        if(char.owned) {
-          selectCharacter(char.name);
-        } else {
-          if(totalCoins >= char.price) {
-            if(confirm(`Buy ${char.name} for ${char.price} coins?`)) {
-              totalCoins -= char.price;
-              updateCoinDisplay();
-              localStorage.setItem('pasu_coins', totalCoins);
-              char.owned = true;
-              localStorage.setItem('pasu_char_' + char.name, 'true');
-              selectCharacter(char.name);
-              populateCharacterPanel();
-            }
-          } else {
-            alert(`Not enough coins! Need ${char.price}, you have ${totalCoins}`);
-          }
-        }
-      });
-      characterList.appendChild(div);
-    });
-  }
-  function selectCharacter(name) {
-    selectedChar = name;
-    localStorage.setItem('pasu_selected_char', name);
-    // Update lobby selection highlight
-    document.querySelectorAll('#charSelect .charOption').forEach(el => {
-      el.classList.toggle('selected', el.dataset.char === name);
-      el.setAttribute('aria-pressed', el.dataset.char === name);
-    });
-    // Update character panel highlight
-    document.querySelectorAll('#characterList .charOption').forEach(el => {
-      el.classList.toggle('selected', el.style.backgroundImage.includes(name));
-      el.setAttribute('aria-pressed', el.style.backgroundImage.includes(name));
-    });
-  }
-
-  // Lobby character selection clicks
-  document.querySelectorAll('#charSelect .charOption').forEach(el => {
-    el.addEventListener('click', () => {
-      selectCharacter(el.dataset.char);
-    });
-  });
-
-  // Panels toggle handlers
-  btnCharacter.addEventListener('click', () => {
-    closeAllPanels();
-    populateCharacterPanel();
-    characterPanel.style.display = 'flex';
-  });
-  btnOptions.addEventListener('click', () => {
-    closeAllPanels();
-    optionPanel.style.display = 'flex';
-  });
-  btnLeaderboard.addEventListener('click', () => {
-    closeAllPanels();
-    leaderboardPanel.style.display = 'flex';
-  });
-  closeCharacter.addEventListener('click', () => { characterPanel.style.display = 'none'; });
-  closeOptions.addEventListener('click', () => { optionPanel.style.display = 'none'; });
-  closeLeaderboard.addEventListener('click', () => { leaderboardPanel.style.display = 'none'; });
-
-  function closeAllPanels() {
-    characterPanel.style.display = 'none';
-    optionPanel.style.display = 'none';
-    leaderboardPanel.style.display = 'none';
-  }
-
-  // Options toggles
-  toggleBGM.addEventListener('change', () => {
-    if(toggleBGM.checked) bgm.play();
-    else bgm.pause();
-  });
-  toggleSFX.addEventListener('change', () => {
-    // No global toggle needed, we'll check flag before play
-  });
-
-  // Play button starts the game
-  playBtn.addEventListener('click', () => {
-    if(gameRunning) return;
-    startGame();
-  });
-
-  // Game variables
-  let obstacleTimer;
-  let coinTimer;
-  let animationFrame;
-
-  function startGame() {
-    // Reset game state
-    lobby.style.display = 'none';
-    gameScreen.style.display = 'block';
-    gameRunning = true;
-    score = 0;
-    coinsCollected = 0;
-    obstacleSpeed = OBSTACLE_SPEED_START;
-    playerY = 0;
-    playerVelocityY = 0;
-    isJumping = false;
-    isSliding = false;
-    obstacles.forEach(o => o.element.remove());
-    obstacles = [];
-    coins.forEach(c => c.element.remove());
-    coins = [];
-    updateCoinCounter();
-    updateScoreCounter();
-    setPlayerCharacter(selectedChar);
-    bgm.play();
-
-    // Spawn initial obstacle + coin
-    spawnObstacle();
-    spawnCoin();
-
-    lastObstacleTime = performance.now();
-    lastCoinTime = performance.now();
-
-    animationFrame = requestAnimationFrame(gameLoop);
-  }
-
-  function gameLoop(ts) {
-    if(!gameRunning) return;
-
-    // Update score and speed
-    score += 0.1;
-    obstacleSpeed += OBSTACLE_SPEED_INCREMENT;
-    updateScoreCounter();
-
-    // Player gravity + jump
-    if(isJumping) {
-      playerVelocityY -= GRAVITY;
-      playerY += playerVelocityY;
-      if(playerY <= 0) {
-        playerY = 0;
-        isJumping = false;
-        playerVelocityY = 0;
-      }
+    function setCharacter(char) {
+      playerChar = char;
+      player.style.backgroundImage = `url(${char})`;
     }
-    player.style.bottom = `${14 + playerY}vh`;
 
-    // Sliding state duration
-    if(isSliding) {
+    document.querySelectorAll('.charOption').forEach(option => {
+      option.onclick = () => {
+        document.querySelectorAll('.charOption').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        setCharacter(option.dataset.char);
+      };
+    });
+
+    document.getElementById('playBtn').onclick = () => {
+      lobby.style.display = 'none';
+      setCharacter(playerChar);
+      startGame();
+    };
+
+    jumpBtn.onclick = () => jump();
+    slideBtn.onclick = () => slide();
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'ArrowUp') jump();
+      if (e.code === 'ArrowDown') slide();
+    });
+
+    function jump() {
+      if (isJumping || isSliding) return;
+      isJumping = true;
+      velocityY = 20;
+      jumpSound.play();
+    }
+
+    function slide() {
+      if (isJumping || isSliding) return;
+      isSliding = true;
       player.classList.add('slide');
-    } else {
-      player.classList.remove('slide');
+      slideSound.play();
+      setTimeout(() => {
+        player.classList.remove('slide');
+        isSliding = false;
+      }, 800);
     }
 
-    // Move obstacles left and check collisions
-    for(let i = obstacles.length - 1; i >= 0; i--) {
-      const o = obstacles[i];
-      let leftPx = parseFloat(o.element.style.left);
-      leftPx -= obstacleSpeed;
-      if(leftPx + o.width < 0) {
-        o.element.remove();
-        obstacles.splice(i, 1);
-        continue;
+    function startGame() {
+      const game = document.getElementById('gameCanvas');
+      const obstacles = [];
+      const ceilingObstacles = [];
+      const coinItems = [];
+
+      function spawnObstacle() {
+        const ob = document.createElement('div');
+        ob.className = 'obstacle';
+        ob.style.left = '100vw';
+        game.appendChild(ob);
+        obstacles.push(ob);
       }
-      o.element.style.left = leftPx + 'px';
 
-      // Collision detection
-      if(collidesWithPlayer(o)) {
-        endGame();
-        return;
+      function spawnCeilingObstacle() {
+        const ob = document.createElement('div');
+        ob.className = 'ceilingObstacle';
+        ob.style.left = '100vw';
+        ob.style.height = '80px';
+        game.appendChild(ob);
+        ceilingObstacles.push(ob);
       }
-    }
 
-    // Move coins left and check collection
-    for(let i = coins.length - 1; i >= 0; i--) {
-      const c = coins[i];
-      let leftPx = parseFloat(c.element.style.left);
-      leftPx -= obstacleSpeed;
-      if(leftPx + c.width < 0) {
-        c.element.remove();
-        coins.splice(i, 1);
-        continue;
+      function spawnCoin() {
+        const c = document.createElement('div');
+        c.className = 'coin';
+        c.style.left = '100vw';
+        game.appendChild(c);
+        coinItems.push(c);
       }
-      c.element.style.left = leftPx + 'px';
 
-      // Collect coin collision
-      if(collidesWithPlayer(c, true)) {
-        coinsCollected++;
-        totalCoins++;
-        updateCoinCounter();
-        updateCoinDisplay();
-        localStorage.setItem('pasu_coins', totalCoins);
-        if(toggleSFX.checked) audioCoin.play();
-        c.element.remove();
-        coins.splice(i, 1);
+      function gameLoop() {
+        // Physics
+        if (isJumping) {
+          let bottom = parseFloat(getComputedStyle(player).bottom);
+          bottom += velocityY;
+          velocityY -= gravity;
+          if (bottom <= 120) {
+            bottom = 120;
+            isJumping = false;
+          }
+          player.style.bottom = bottom + 'px';
+        }
+
+        // Move & detect
+        [...obstacles, ...ceilingObstacles, ...coinItems].forEach(item => {
+          let left = parseFloat(item.style.left);
+          left -= 5;
+          item.style.left = left + 'px';
+
+          const pRect = player.getBoundingClientRect();
+          const iRect = item.getBoundingClientRect();
+
+          if (left < -100) item.remove();
+
+          // Coin collect
+          if (item.className === 'coin' &&
+            pRect.left < iRect.right &&
+            pRect.right > iRect.left &&
+            pRect.top < iRect.bottom &&
+            pRect.bottom > iRect.top
+          ) {
+            item.remove();
+            coins++;
+            coinCountEl.textContent = "Coins: " + coins;
+          }
+
+          // Collision
+          if ((item.className.includes('obstacle') || item.className.includes('ceilingObstacle')) &&
+            pRect.left < iRect.right &&
+            pRect.right > iRect.left &&
+            pRect.top < iRect.bottom &&
+            pRect.bottom > iRect.top
+          ) {
+            gameOver.style.display = 'flex';
+            cancelAnimationFrame(loop);
+          }
+        });
+
+        // Spawn random
+        if (Math.random() < 0.02) spawnObstacle();
+        if (Math.random() < 0.01) spawnCeilingObstacle();
+        if (Math.random() < 0.02) spawnCoin();
+
+        score++;
+        scoreEl.textContent = "Score: " + score;
+
+        loop = requestAnimationFrame(gameLoop);
       }
+
+      let loop = requestAnimationFrame(gameLoop);
     }
-
-    // Spawn obstacles periodically
-    if(ts - lastObstacleTime > getRandomInt(OBSTACLE_SPAWN_INTERVAL_MIN, OBSTACLE_SPAWN_INTERVAL_MAX)) {
-      spawnObstacle();
-      lastObstacleTime = ts;
-    }
-    // Spawn coins periodically
-    if(ts - lastCoinTime > 1500 && Math.random() < COIN_SPAWN_CHANCE) {
-      spawnCoin();
-      lastCoinTime = ts;
-    }
-
-    animationFrame = requestAnimationFrame(gameLoop);
-  }
-
-  function collidesWithPlayer(obj, isCoin = false) {
-    const pRect = player.getBoundingClientRect();
-    const oRect = obj.element.getBoundingClientRect();
-
-    // If sliding, reduce player height (hitbox)
-    let pTop = pRect.top;
-    if(isSliding) {
-      pTop = pRect.top + pRect.height * 0.4; // player "lowered" hitbox when sliding
-    }
-
-    // Axis-Aligned Bounding Box collision check
-    if(
-      pRect.right > oRect.left &&
-      pRect.left < oRect.right &&
-      (isSliding ? (pRect.bottom > oRect.top) : (pTop < oRect.bottom)) &&
-      pRect.bottom > oRect.top
-    ) return true;
-
-    return false;
-  }
-
-  // Spawn ground or ceiling obstacle
-  function spawnObstacle() {
-    const isCeiling = Math.random() < 0.3;
-    const obstacle = document.createElement('div');
-    obstacle.classList.add('obstacle');
-    if(isCeiling) {
-      obstacle.classList.add('ceiling');
-      obstacle.style.top = '0px';
-      obstacle.style.height = CEILING_OBSTACLE_HEIGHT + 'px';
-      obstacle.style.width = CEILING_OBSTACLE_WIDTH + 'px';
-    } else {
-      obstacle.classList.add('ground');
-      obstacle.style.bottom = '14vh';
-      obstacle.style.height = '100px';
-      obstacle.style.width = '60px';
-    }
-    obstacle.style.left = window.innerWidth + 'px';
-    gameScreen.appendChild(obstacle);
-    obstacles.push({
-      element: obstacle,
-      width: parseFloat(obstacle.style.width),
-      height: parseFloat(obstacle.style.height),
-      ceiling: isCeiling,
-    });
-  }
-
-  // Spawn coin in air between 20vh to 40vh height, random horizontal position right side
-  function spawnCoin() {
-    const coin = document.createElement('div');
-    coin.classList.add('coin');
-    coin.style.bottom = (20 + Math.random() * 20) + 'vh';
-    coin.style.left = window.innerWidth + 'px';
-    gameScreen.appendChild(coin);
-    coins.push({
-      element: coin,
-      width: 35,
-      height: 35,
-    });
-  }
-
-  // Set player sprite image
- 
+  </script>
+</body>
+</html>
